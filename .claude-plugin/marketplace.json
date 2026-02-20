@@ -1,0 +1,26 @@
+{
+  "name": "punt-labs",
+  "owner": {
+    "name": "Punt Labs",
+    "email": "hello@punt-labs.com"
+  },
+  "metadata": {
+    "description": "Claude Code plugins for Punt Labs projects"
+  },
+  "plugins": [
+    {
+      "name": "punt",
+      "source": {
+        "source": "github",
+        "repo": "punt-labs/punt-kit"
+      },
+      "description": "Punt Labs standards enforcement — LLM-powered reconciliation of workflows, configs, and project structure",
+      "version": "0.1.0",
+      "author": {
+        "name": "Punt Labs",
+        "email": "hello@punt-labs.com"
+      },
+      "keywords": ["standards", "reconciliation", "workflows"]
+    }
+  ]
+}
