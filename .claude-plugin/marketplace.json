@@ -29,7 +29,7 @@
         "repo": "punt-labs/dungeon"
       },
       "description": "A text adventure game engine for Claude Code — play scripted dungeon crawls powered by Claude as game master",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
