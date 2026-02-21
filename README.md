@@ -5,19 +5,30 @@ Plugin marketplace for [Punt Labs](https://github.com/punt-labs) projects.
 ## Quick Start
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/3ebea28/install.sh | sh
 ```
 
-The script fetches the marketplace catalog, shows what plugins are available
-(with source repos), displays a sha256 checksum for verification, then
-registers the marketplace with Claude Code. No files are modified until you
-confirm the source is what you expect.
+The URL is pinned to a specific commit. The script fetches the marketplace
+catalog, shows available plugins with source repos, displays a sha256 checksum,
+then registers the marketplace with Claude Code.
 
 <details>
 <summary>Manual setup (no curl)</summary>
 
 ```bash
 claude plugin marketplace add punt-labs/claude-plugins
+```
+
+</details>
+
+<details>
+<summary>Verify before running</summary>
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/3ebea28/install.sh -o install.sh
+shasum -a 256 install.sh
+cat install.sh
+sh install.sh
 ```
 
 </details>
@@ -38,14 +49,3 @@ claude plugin install dungeon@punt-labs
 claude plugin install biff@punt-labs
 ```
 
-## Verify the Install Script
-
-Before piping to `sh`, you can download and inspect:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/main/install.sh -o install.sh
-shasum -a 256 install.sh
-# Expected: c6035e237479904377a7d99096c9ba7fb7e2871499b858b009302a050b240b09
-cat install.sh
-sh install.sh
-```
