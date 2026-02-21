@@ -40,6 +40,7 @@ sh install.sh
 | `punt` | [punt-kit](https://github.com/punt-labs/punt-kit) | Standards enforcement and reconciliation |
 | `dungeon` | [dungeon](https://github.com/punt-labs/dungeon) | Text adventure game engine for Claude Code |
 | `biff` | [biff](https://github.com/punt-labs/biff) | UNIX-style team communication (`/who`, `/finger`, `/write`, `/read`) |
+| `prfaq` | [prfaq](https://github.com/punt-labs/prfaq) | Amazon Working Backwards PR/FAQ process with LaTeX output |
 
 ## Install a Plugin
 
@@ -47,5 +48,6 @@ sh install.sh
 claude plugin install punt@punt-labs
 claude plugin install dungeon@punt-labs
 claude plugin install biff@punt-labs
+claude plugin install prfaq@punt-labs
 ```
 

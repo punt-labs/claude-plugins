@@ -49,6 +49,20 @@
         "email": "hello@punt-labs.com"
       },
       "keywords": ["communication", "team", "unix", "messaging"]
+    },
+    {
+      "name": "prfaq",
+      "source": {
+        "source": "github",
+        "repo": "punt-labs/prfaq"
+      },
+      "description": "Amazon Working Backwards PR/FAQ process — generate professional LaTeX documents for product discovery and decision-making",
+      "version": "1.1.0",
+      "author": {
+        "name": "Punt Labs",
+        "email": "hello@punt-labs.com"
+      },
+      "keywords": ["prfaq", "working-backwards", "latex", "product"]
     }
   ]
 }
