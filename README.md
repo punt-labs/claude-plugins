@@ -50,4 +50,3 @@ claude plugin install dungeon@punt-labs
 claude plugin install biff@punt-labs
 claude plugin install prfaq@punt-labs
 ```
-
