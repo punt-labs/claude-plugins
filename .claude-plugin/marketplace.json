@@ -63,6 +63,20 @@
         "email": "hello@punt-labs.com"
       },
       "keywords": ["prfaq", "working-backwards", "latex", "product"]
+    },
+    {
+      "name": "quarry",
+      "source": {
+        "source": "github",
+        "repo": "punt-labs/quarry"
+      },
+      "description": "Local semantic search for Claude Code: /find, /ingest, /explain, /source, /quarry",
+      "version": "0.8.1",
+      "author": {
+        "name": "Punt Labs",
+        "email": "hello@punt-labs.com"
+      },
+      "keywords": ["search", "semantic", "knowledge-base", "documents", "lancedb"]
     }
   ]
 }
