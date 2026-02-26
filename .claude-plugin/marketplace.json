@@ -91,6 +91,21 @@
         "email": "hello@punt-labs.com"
       },
       "keywords": ["search", "semantic", "knowledge-base", "documents", "lancedb"]
+    },
+    {
+      "name": "z-spec",
+      "source": {
+        "source": "github",
+        "repo": "punt-labs/z-spec",
+        "ref": "v0.1.0"
+      },
+      "description": "Formal Z specifications for stateful systems — generate, type-check, animate, and derive test cases with fuzz and ProB",
+      "version": "0.1.0",
+      "author": {
+        "name": "Punt Labs",
+        "email": "hello@punt-labs.com"
+      },
+      "keywords": ["z-notation", "formal-methods", "specification", "testing", "fuzz", "probcli"]
     }
   ]
 }
