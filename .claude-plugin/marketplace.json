@@ -71,7 +71,7 @@
         "repo": "punt-labs/tts"
       },
       "description": "Voice for your AI coding assistant: /notify, /speak, /recap, /say — hear when tasks finish or need input",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
