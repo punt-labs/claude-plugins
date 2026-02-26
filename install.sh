@@ -1,6 +1,6 @@
 #!/bin/sh
-# Install z-spec — formal Z specifications for Claude Code.
-# Usage: curl -fsSL https://raw.githubusercontent.com/punt-labs/z-spec/<SHA>/install.sh | sh
+# Register the Punt Labs marketplace for Claude Code plugins.
+# Usage: curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/main/install.sh | sh
 set -eu
 
 # --- Colors (disabled when not a terminal) ---
@@ -10,13 +10,13 @@ else
   BOLD='' GREEN='' YELLOW='' NC=''
 fi
 
-info() { printf '%b==>%b %s\n' "$BOLD" "$NC" "$1"; }
+info() { printf '%b▶%b %s\n' "$BOLD" "$NC" "$1"; }
 ok()   { printf '  %b✓%b %s\n' "$GREEN" "$NC" "$1"; }
+warn() { printf '  %b!%b %s\n' "$YELLOW" "$NC" "$1"; }
 fail() { printf '  %b✗%b %s\n' "$YELLOW" "$NC" "$1"; exit 1; }
 
 MARKETPLACE_REPO="punt-labs/claude-plugins"
 MARKETPLACE_NAME="punt-labs"
-PLUGIN_NAME="z-spec"
 
 # --- Step 1: Claude Code CLI ---
 
@@ -40,39 +40,12 @@ else
   ok "marketplace registered"
 fi
 
-# --- Step 3: SSH fallback for plugin install ---
-
-# claude plugin install clones via SSH (git@github.com:...).
-# Users without SSH keys need an HTTPS fallback.
-NEED_HTTPS_REWRITE=0
-cleanup_https_rewrite() {
-  if [ "$NEED_HTTPS_REWRITE" = "1" ]; then
-    git config --global --unset url."https://github.com/".insteadOf 2>/dev/null || true
-    NEED_HTTPS_REWRITE=0
-  fi
-}
-trap cleanup_https_rewrite EXIT INT TERM
-
-if ! ssh -o StrictHostKeyChecking=accept-new -o BatchMode=yes -o ConnectTimeout=5 -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
-  printf '  %b%s%b %s\n' "$YELLOW" "!" "$NC" "SSH auth to GitHub unavailable, using HTTPS fallback"
-  git config --global url."https://github.com/".insteadOf "git@github.com:"
-  NEED_HTTPS_REWRITE=1
-fi
-
-# --- Step 4: Install plugin ---
-
-info "Installing $PLUGIN_NAME..."
-
-if ! claude plugin install "${PLUGIN_NAME}@${MARKETPLACE_NAME}"; then
-  cleanup_https_rewrite
-  fail "Failed to install $PLUGIN_NAME"
-fi
-ok "$PLUGIN_NAME installed"
-
-cleanup_https_rewrite
-
 # --- Done ---
 
-printf '\n%b%b%s is ready!%b\n\n' "$GREEN" "$BOLD" "$PLUGIN_NAME" "$NC"
-printf 'Restart Claude Code, then type /z help to get started.\n'
-printf 'Run /z setup to install fuzz and probcli.\n\n'
+printf '\n%b%bPunt Labs marketplace is ready!%b\n\n' "$GREEN" "$BOLD" "$NC"
+printf 'Available plugins:\n'
+printf '  claude plugin install biff@punt-labs      # team communication\n'
+printf '  claude plugin install prfaq@punt-labs     # PR/FAQ documents\n'
+printf '  claude plugin install dungeon@punt-labs   # text adventure game\n'
+printf '  claude plugin install z-spec@punt-labs    # formal Z specifications\n'
+printf '\nBrowse all: claude plugin marketplace list\n\n'
