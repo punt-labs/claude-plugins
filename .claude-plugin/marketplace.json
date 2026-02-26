@@ -65,6 +65,20 @@
       "keywords": ["prfaq", "working-backwards", "latex", "product"]
     },
     {
+      "name": "tts",
+      "source": {
+        "source": "github",
+        "repo": "punt-labs/tts"
+      },
+      "description": "Voice for your AI coding assistant: /notify, /speak, /recap, /say — hear when tasks finish or need input",
+      "version": "0.2.0",
+      "author": {
+        "name": "Punt Labs",
+        "email": "hello@punt-labs.com"
+      },
+      "keywords": ["tts", "voice", "notifications", "audio", "speech"]
+    },
+    {
       "name": "quarry",
       "source": {
         "source": "github",
