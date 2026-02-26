@@ -39,7 +39,9 @@ sh install.sh
 |--------|--------|-------------|
 | `quarry` | [quarry](https://github.com/punt-labs/quarry) | Local semantic search with automagic knowledge capture |
 | `biff` | [biff](https://github.com/punt-labs/biff) | UNIX-style team communication (`/who`, `/finger`, `/write`, `/read`) |
+| `tts` | [tts](https://github.com/punt-labs/tts) | Voice for your AI coding assistant (`/notify`, `/speak`, `/recap`, `/say`) |
 | `prfaq` | [prfaq](https://github.com/punt-labs/prfaq) | Amazon Working Backwards PR/FAQ process with LaTeX output |
+| `z-spec` | [z-spec](https://github.com/punt-labs/z-spec) | Formal Z specifications --- generate, type-check, animate, and derive test cases |
 | `punt` | [punt-kit](https://github.com/punt-labs/punt-kit) | Standards enforcement and reconciliation |
 | `dungeon` | [dungeon](https://github.com/punt-labs/dungeon) | Text adventure game engine for Claude Code |
 
@@ -48,7 +50,9 @@ sh install.sh
 ```bash
 claude plugin install quarry@punt-labs
 claude plugin install biff@punt-labs
+claude plugin install tts@punt-labs
 claude plugin install prfaq@punt-labs
+claude plugin install z-spec@punt-labs
 claude plugin install punt@punt-labs
 claude plugin install dungeon@punt-labs
 ```
