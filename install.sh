@@ -43,9 +43,10 @@ fi
 # --- Done ---
 
 printf '\n%b%bPunt Labs marketplace is ready!%b\n\n' "$GREEN" "$BOLD" "$NC"
-printf 'Available plugins:\n'
-printf '  claude plugin install biff@punt-labs      # team communication\n'
-printf '  claude plugin install prfaq@punt-labs     # PR/FAQ documents\n'
-printf '  claude plugin install dungeon@punt-labs   # text adventure game\n'
-printf '  claude plugin install z-spec@punt-labs    # formal Z specifications\n'
-printf '\nBrowse all: claude plugin marketplace list\n\n'
+printf 'Install a plugin:\n'
+printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/tts/main/install.sh | sh\n'
+printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/biff/main/install.sh | sh\n'
+printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/quarry/main/install.sh | sh\n'
+printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/prfaq/main/install.sh | sh\n'
+printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/z-spec/main/install.sh | sh\n'
+printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/dungeon/main/install.sh | sh\n'
