@@ -44,15 +44,3 @@ sh install.sh
 | `z-spec` | [z-spec](https://github.com/punt-labs/z-spec) | Formal Z specifications --- generate, type-check, animate, and derive test cases |
 | `punt` | [punt-kit](https://github.com/punt-labs/punt-kit) | Standards enforcement and reconciliation |
 | `dungeon` | [dungeon](https://github.com/punt-labs/dungeon) | Text adventure game engine for Claude Code |
-
-## Install a Plugin
-
-```bash
-claude plugin install quarry@punt-labs
-claude plugin install biff@punt-labs
-claude plugin install tts@punt-labs
-claude plugin install prfaq@punt-labs
-claude plugin install z-spec@punt-labs
-claude plugin install punt@punt-labs
-claude plugin install dungeon@punt-labs
-```
