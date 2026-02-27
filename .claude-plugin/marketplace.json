@@ -13,15 +13,21 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/punt-kit",
-        "ref": "v0.2.0"
+        "ref": "v0.2.1"
       },
-      "description": "Punt Labs standards enforcement — init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
-      "version": "0.2.0",
+      "description": "Punt Labs standards enforcement \u2014 init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
+      "version": "0.2.1",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
       },
-      "keywords": ["standards", "reconciliation", "workflows", "scaffolding", "audit"]
+      "keywords": [
+        "standards",
+        "reconciliation",
+        "workflows",
+        "scaffolding",
+        "audit"
+      ]
     },
     {
       "name": "dungeon",
@@ -30,13 +36,17 @@
         "repo": "punt-labs/dungeon",
         "ref": "v0.1.3"
       },
-      "description": "A text adventure game engine for Claude Code — play scripted dungeon crawls powered by Claude as game master",
+      "description": "A text adventure game engine for Claude Code \u2014 play scripted dungeon crawls powered by Claude as game master",
       "version": "0.1.3",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
       },
-      "keywords": ["game", "adventure", "dungeon"]
+      "keywords": [
+        "game",
+        "adventure",
+        "dungeon"
+      ]
     },
     {
       "name": "biff",
@@ -51,7 +61,12 @@
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
       },
-      "keywords": ["communication", "team", "unix", "messaging"]
+      "keywords": [
+        "communication",
+        "team",
+        "unix",
+        "messaging"
+      ]
     },
     {
       "name": "prfaq",
@@ -60,13 +75,18 @@
         "repo": "punt-labs/prfaq",
         "ref": "v1.2.0"
       },
-      "description": "Amazon Working Backwards PR/FAQ process — generate professional LaTeX documents for product discovery and decision-making",
+      "description": "Amazon Working Backwards PR/FAQ process \u2014 generate professional LaTeX documents for product discovery and decision-making",
       "version": "1.2.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
       },
-      "keywords": ["prfaq", "working-backwards", "latex", "product"]
+      "keywords": [
+        "prfaq",
+        "working-backwards",
+        "latex",
+        "product"
+      ]
     },
     {
       "name": "tts",
@@ -75,13 +95,19 @@
         "repo": "punt-labs/tts",
         "ref": "v0.5.0"
       },
-      "description": "Voice for your AI coding assistant: /notify, /speak, /recap, /say — hear when tasks finish or need input",
+      "description": "Voice for your AI coding assistant: /notify, /speak, /recap, /say \u2014 hear when tasks finish or need input",
       "version": "0.5.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
       },
-      "keywords": ["tts", "voice", "notifications", "audio", "speech"]
+      "keywords": [
+        "tts",
+        "voice",
+        "notifications",
+        "audio",
+        "speech"
+      ]
     },
     {
       "name": "quarry",
@@ -96,7 +122,13 @@
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
       },
-      "keywords": ["search", "semantic", "knowledge-base", "documents", "lancedb"]
+      "keywords": [
+        "search",
+        "semantic",
+        "knowledge-base",
+        "documents",
+        "lancedb"
+      ]
     },
     {
       "name": "z-spec",
@@ -105,13 +137,20 @@
         "repo": "punt-labs/z-spec",
         "ref": "v0.1.1"
       },
-      "description": "Formal Z specifications for stateful systems — generate, type-check, animate, and derive test cases with fuzz and ProB",
+      "description": "Formal Z specifications for stateful systems \u2014 generate, type-check, animate, and derive test cases with fuzz and ProB",
       "version": "0.1.1",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
       },
-      "keywords": ["z-notation", "formal-methods", "specification", "testing", "fuzz", "probcli"]
+      "keywords": [
+        "z-notation",
+        "formal-methods",
+        "specification",
+        "testing",
+        "fuzz",
+        "probcli"
+      ]
     }
   ]
 }
