@@ -53,10 +53,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/biff",
-        "ref": "v0.12.1"
+        "ref": "v0.12.2"
       },
       "description": "UNIX-style team communication for Claude Code: /who, /finger, /plan, /write, /read, /mesg, /tty, /last, /wall, /talk",
-      "version": "0.12.1",
+      "version": "0.12.2",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
