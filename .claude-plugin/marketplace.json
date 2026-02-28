@@ -13,10 +13,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/punt-kit",
-        "ref": "v0.2.1"
+        "ref": "v0.2.2"
       },
       "description": "Punt Labs standards enforcement — init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
@@ -53,10 +53,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/biff",
-        "ref": "v0.12.0"
+        "ref": "v0.12.1"
       },
       "description": "UNIX-style team communication for Claude Code: /who, /finger, /plan, /write, /read, /mesg, /tty, /last, /wall, /talk",
-      "version": "0.12.0",
+      "version": "0.12.1",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
@@ -114,10 +114,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/quarry",
-        "ref": "v0.10.0"
+        "ref": "v0.10.1"
       },
       "description": "Local semantic search with automagic knowledge capture: /find, /ingest, /explain, /source, /quarry",
-      "version": "0.10.0",
+      "version": "0.10.1",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
