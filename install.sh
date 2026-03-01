@@ -38,11 +38,11 @@ fi
 
 info "Registering Punt Labs marketplace..."
 
-if claude plugin marketplace list 2>/dev/null | grep -q "$MARKETPLACE_NAME"; then
+if claude plugin marketplace list < /dev/null 2>/dev/null | grep -q "$MARKETPLACE_NAME"; then
   ok "marketplace already registered"
-  claude plugin marketplace update "$MARKETPLACE_NAME" 2>/dev/null || true
+  claude plugin marketplace update "$MARKETPLACE_NAME" < /dev/null 2>/dev/null || true
 else
-  claude plugin marketplace add "$MARKETPLACE_REPO" || fail "Failed to register marketplace"
+  claude plugin marketplace add "$MARKETPLACE_REPO" < /dev/null || fail "Failed to register marketplace"
   ok "marketplace registered"
 fi
 
