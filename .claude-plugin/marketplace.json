@@ -92,7 +92,7 @@
       "name": "tts",
       "source": {
         "source": "github",
-        "repo": "punt-labs/tts",
+        "repo": "punt-labs/vox",
         "ref": "v0.10.1"
       },
       "description": "Voice for your AI coding assistant: /notify, /speak, /recap, /say, /vibe, /voice — hear when tasks finish or need input",
