@@ -2,6 +2,10 @@
 
 This repo is the Punt Labs plugin marketplace catalog for Claude Code.
 
+## Scratch Files
+
+Use `.tmp/` at the project root for scratch and temporary files — never `/tmp`. The `TMPDIR` environment variable is set via `.envrc` so that `tempfile` and subprocesses automatically use it. Contents are gitignored; only `.gitkeep` is tracked.
+
 ## Quality Gates
 
 ```bash
