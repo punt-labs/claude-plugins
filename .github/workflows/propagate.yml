@@ -24,6 +24,7 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: write
+      pull-requests: write
     env:
       INPUT_REPO: ${{ inputs.repo }}
       INPUT_VERSION: ${{ inputs.version }}
@@ -78,7 +79,29 @@ jobs:
           else
             git add "$MARKETPLACE"
             git commit -m "chore: bump $SHORT to $INPUT_TAG in marketplace"
-            git push origin main
           fi
         env:
           MARKETPLACE: .claude-plugin/marketplace.json
+
+      - name: Create PR
+        run: |
+          if git diff --quiet HEAD origin/main; then
+            echo "Nothing to push"
+            exit 0
+          fi
+
+          SHORT="${INPUT_REPO#*/}"
+          BRANCH="propagate/${SHORT}-${INPUT_TAG}"
+          git checkout -b "$BRANCH"
+          git push origin "$BRANCH"
+
+          PR_URL=$(gh pr create \
+            --title "chore: bump $SHORT to $INPUT_TAG in marketplace" \
+            --body "Automated propagation from ${INPUT_REPO} ${INPUT_TAG}." \
+            --head "$BRANCH" \
+            --base main)
+          echo "Created PR: $PR_URL"
+
+          gh pr merge "$PR_URL" --auto --squash
+        env:
+          GH_TOKEN: ${{ github.token }}
