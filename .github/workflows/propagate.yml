@@ -104,4 +104,4 @@ jobs:
 
           gh pr merge "$PR_URL" --auto --squash
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.PROPAGATE_TOKEN }}
