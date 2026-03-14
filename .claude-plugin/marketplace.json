@@ -135,10 +135,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/lux",
-        "ref": "v0.11.0"
+        "ref": "v0.12.0"
       },
       "description": "Visual output surface for Claude Code \u2014 display tables, charts, dashboards, and interactive elements in a native window",
-      "version": "0.11.0",
+      "version": "0.12.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
