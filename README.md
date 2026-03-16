@@ -39,6 +39,7 @@ sh install.sh
 |--------|--------|-------------|
 | `quarry` | [quarry](https://github.com/punt-labs/quarry) | Local semantic search with automagic knowledge capture |
 | `biff` | [biff](https://github.com/punt-labs/biff) | UNIX-style team communication (`/who`, `/finger`, `/write`, `/read`) |
+| `beadle` | [beadle](https://github.com/punt-labs/beadle) | Autonomous email agent with Proton Bridge and PGP trust model |
 | `vox` | [vox](https://github.com/punt-labs/vox) | Voice for your AI coding assistant (`/unmute`, `/speak`, `/recap`, `/vibe`) |
 | `prfaq` | [prfaq](https://github.com/punt-labs/prfaq) | Amazon Working Backwards PR/FAQ process with LaTeX output |
 | `lux` | [lux](https://github.com/punt-labs/lux) | Visual output surface --- tables, charts, dashboards, and interactive elements |
