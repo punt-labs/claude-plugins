@@ -15,7 +15,7 @@
         "repo": "punt-labs/punt-kit",
         "ref": "v0.7.8"
       },
-      "description": "Punt Labs standards enforcement — init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
+      "description": "Punt Labs standards enforcement \u2014 init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
       "version": "0.7.8",
       "author": {
         "name": "Punt Labs",
@@ -36,7 +36,7 @@
         "repo": "punt-labs/dungeon",
         "ref": "v0.1.3"
       },
-      "description": "A text adventure game engine for Claude Code — play scripted dungeon crawls powered by Claude as game master",
+      "description": "A text adventure game engine for Claude Code \u2014 play scripted dungeon crawls powered by Claude as game master",
       "version": "0.1.3",
       "author": {
         "name": "Punt Labs",
@@ -96,7 +96,7 @@
         "repo": "punt-labs/prfaq",
         "ref": "v1.6.1"
       },
-      "description": "Amazon Working Backwards PR/FAQ process — generate professional LaTeX documents for product discovery and decision-making",
+      "description": "Amazon Working Backwards PR/FAQ process \u2014 generate professional LaTeX documents for product discovery and decision-making",
       "version": "1.6.1",
       "author": {
         "name": "Punt Labs",
@@ -116,7 +116,7 @@
         "repo": "punt-labs/vox",
         "ref": "v1.10.0"
       },
-      "description": "Voice for your AI coding assistant: /unmute, /mute, /vibe, /recap — hear when tasks finish or need input",
+      "description": "Voice for your AI coding assistant: /unmute, /mute, /vibe, /recap \u2014 hear when tasks finish or need input",
       "version": "1.10.0",
       "author": {
         "name": "Punt Labs",
@@ -158,7 +158,7 @@
         "repo": "punt-labs/lux",
         "ref": "v0.15.1"
       },
-      "description": "Visual output surface for Claude Code — display tables, charts, dashboards, and interactive elements in a native window",
+      "description": "Visual output surface for Claude Code \u2014 display tables, charts, dashboards, and interactive elements in a native window",
       "version": "0.15.1",
       "author": {
         "name": "Punt Labs",
@@ -180,7 +180,7 @@
         "repo": "punt-labs/z-spec",
         "ref": "v0.14.0"
       },
-      "description": "Formal Z specifications for stateful systems — generate, type-check, animate, and derive test cases with fuzz and ProB",
+      "description": "Formal Z specifications for stateful systems \u2014 generate, type-check, animate, and derive test cases with fuzz and ProB",
       "version": "0.14.0",
       "author": {
         "name": "Punt Labs",
@@ -200,10 +200,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/ethos",
-        "ref": "v0.4.0"
+        "ref": "v0.5.0"
       },
-      "description": "Identity binding for humans and AI agents — voice, email, GitHub, writing style, personality, skills",
-      "version": "0.4.0",
+      "description": "Identity binding for humans and AI agents \u2014 voice, email, GitHub, writing style, personality, skills",
+      "version": "0.5.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
