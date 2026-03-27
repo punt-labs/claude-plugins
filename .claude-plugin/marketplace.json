@@ -200,10 +200,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/ethos",
-        "ref": "v2.2.0"
+        "ref": "v2.2.1"
       },
       "description": "Identity binding for humans and AI agents \u2014 voice, email, GitHub, writing style, personality, skills",
-      "version": "2.2.0",
+      "version": "2.2.1",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
