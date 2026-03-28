@@ -49,10 +49,5 @@ fi
 # --- Done ---
 
 printf '\n%b%bPunt Labs marketplace is ready!%b\n\n' "$GREEN" "$BOLD" "$NC"
-printf 'Install a plugin:\n'
-printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/vox/main/install.sh | sh\n'
-printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/biff/main/install.sh | sh\n'
-printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/quarry/main/install.sh | sh\n'
-printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/prfaq/main/install.sh | sh\n'
-printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/z-spec/main/install.sh | sh\n'
-printf '  curl -fsSL https://raw.githubusercontent.com/punt-labs/dungeon/main/install.sh | sh\n'
+printf 'Install all tools and plugins:\n'
+printf '  See https://github.com/punt-labs for the install-all.sh command.\n'
