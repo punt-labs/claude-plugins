@@ -53,10 +53,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/beadle",
-        "ref": "v0.11.2"
+        "ref": "v0.12.0"
       },
       "description": "Autonomous agent daemon with email communication via Proton Bridge and PGP trust model",
-      "version": "0.11.2",
+      "version": "0.12.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
