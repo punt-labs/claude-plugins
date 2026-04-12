@@ -114,10 +114,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/vox",
-        "ref": "v4.5.1"
+        "ref": "v4.6.0"
       },
       "description": "Voice for your AI coding assistant: /unmute, /mute, /vibe, /recap \u2014 hear when tasks finish or need input",
-      "version": "4.5.1",
+      "version": "4.6.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
