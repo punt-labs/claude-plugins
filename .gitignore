@@ -1,0 +1,6 @@
+*.local
+*.local.*
+
+# Scratch directory (TMPDIR set via .envrc)
+.tmp/*
+!.tmp/.gitkeep
