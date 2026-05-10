@@ -66,7 +66,7 @@ This repo is the marketplace catalog. Most edits are direct: bump a version in `
 | New plugin entry that introduces a new install path | `claude` (leader) | `kth` (Hightower) — infra/CI |
 | Org-policy change to plugin distribution | `claude` (leader) | `mcg` (Cagan) — product strategy |
 
-Worker and evaluator must be distinct handles with no shared role. Use the `docs` pipeline for catalog-only changes; otherwise direct dispatch is fine. The full org roster is available via `ethos identity list` if cross-domain review is warranted (e.g., a plugin that surfaces ML or formal-methods features may want `kpz`/`ylc` or `jms`/`jra` review of its README claims).
+Within each row, the worker and evaluator must be distinct handles. Use the `docs` pipeline for catalog-only changes; otherwise direct dispatch is fine. The full org roster is available via `ethos identity list` if cross-domain review is warranted (e.g., a plugin that surfaces ML or formal-methods features may want `kpz`/`ylc` or `jms`/`jra` review of its README claims).
 
 ## Standards References
 
