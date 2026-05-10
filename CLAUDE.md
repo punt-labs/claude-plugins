@@ -52,6 +52,22 @@ Do **not** merge immediately after creating a PR. Expect **2–6 review cycles**
 7. **Repeat steps 3–6** until the latest review is **uneventful** — zero new comments, all checks green.
 8. **Merge only when the last review was clean** — use `mcp__github__merge_pull_request` (not `gh pr merge`).
 
+## Ethos & Delegation
+
+This repo is the marketplace catalog. Most edits are direct: bump a version in `marketplace.json`, update `README.md`, regenerate `install.sh` SHA pins. The work is small, mechanical, and rarely benefits from a multi-stage pipeline. The review pairing still matters — a release-distribution change that breaks `install.sh` invalidates every consumer.
+
+**Identity** — `agent: claude` per `.punt-labs/ethos.yaml`. Claude (the leader) is never the evaluator; pair every change with a specialist below.
+
+| Task type | Worker | Evaluator |
+|-----------|--------|-----------|
+| Marketplace entry add / version bump | `claude` (leader, direct) | `adb` (Lovelace) — release/CI awareness |
+| `install.sh` change | `claude` (leader, direct) | `mdm` (McIlroy) — POSIX sh + pipe correctness |
+| README / catalog onboarding text | `claude` (leader, direct) | `claudia` (Massimo) — editorial |
+| New plugin entry that introduces a new install path | `claude` (leader) | `kth` (Hightower) — infra/CI |
+| Org-policy change to plugin distribution | `claude` (leader) | `mcg` (Cagan) — product strategy |
+
+Worker and evaluator must be distinct handles with no shared role. Use the `docs` pipeline for catalog-only changes; otherwise direct dispatch is fine. The full org roster is available via `ethos identity list` if cross-domain review is warranted (e.g., a plugin that surfaces ML or formal-methods features may want `kpz`/`ylc` or `jms`/`jra` review of its README claims).
+
 ## Standards References
 
 - [Distribution](https://github.com/punt-labs/punt-kit/blob/main/standards/distribution.md)
