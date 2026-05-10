@@ -9,9 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - `beadle` v0.3.0 — autonomous email agent with Proton Bridge and PGP trust model
-- `.punt-labs/ethos.yaml` declaring `agent: claude` for this repo
-- `.punt-labs/ethos/` team submodule pointing at `punt-labs/team` for org-wide identity registry
+- `.punt-labs/ethos/` team submodule pointing at `punt-labs/team@e027a5d` for the org-wide identity registry
 - `Ethos & Delegation` section in `CLAUDE.md` with worker/evaluator pairings for catalog work
+
+### Removed
+
+- `.punt-labs/ethos/config.yaml` (held `active: claude`) — superseded by the new `.punt-labs/ethos` submodule and the existing `.punt-labs/ethos.yaml`
 
 ### Fixed
 
