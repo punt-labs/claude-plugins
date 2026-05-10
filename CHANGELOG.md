@@ -8,16 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- `.punt-labs/ethos/` team submodule pointing at `punt-labs/team@e027a5d` for the org-wide identity registry
+- `.punt-labs/ethos/` team submodule pointing at `punt-labs/team` for the org-wide identity registry (gitlink in `.punt-labs/ethos` is the source of truth)
 - `Ethos & Delegation` section in `CLAUDE.md` with worker/evaluator pairings for catalog work
 
 ### Removed
 
 - `.punt-labs/ethos/config.yaml` (held `active: claude`) — superseded by the new `.punt-labs/ethos` submodule and the existing `.punt-labs/ethos.yaml`
-
-### Fixed
-
-- `install.sh` — removed example URLs pinned to `main` (violates distribution standard); replaced with pointer to org profile
 
 ### Changed
 
