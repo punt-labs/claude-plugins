@@ -54,7 +54,7 @@ Do **not** merge immediately after creating a PR. Expect **2–6 review cycles**
 
 ## Ethos & Delegation
 
-This repo is the marketplace catalog. Most edits are direct: bump a version in `marketplace.json`, update `README.md`, regenerate `install.sh` SHA pins. The work is small, mechanical, and rarely benefits from a multi-stage pipeline. The review pairing still matters — a release-distribution change that breaks `install.sh` invalidates every consumer.
+This repo is the marketplace catalog. Most edits are direct: bump a version in `.claude-plugin/marketplace.json`, update `README.md`, regenerate `install.sh` SHA pins. The work is small, mechanical, and rarely benefits from a multi-stage pipeline. The review pairing still matters — a release-distribution change that breaks `install.sh` invalidates every consumer.
 
 **Identity** — `agent: claude` per `.punt-labs/ethos.yaml`. Claude (the leader) is never the evaluator; pair every change with a specialist below.
 
