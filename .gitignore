@@ -4,3 +4,6 @@
 # Scratch directory (TMPDIR set via .envrc)
 .tmp/*
 !.tmp/.gitkeep
+
+# Quarry session-transcript captures (pkit-kcps)
+.punt-labs/quarry/captures/
