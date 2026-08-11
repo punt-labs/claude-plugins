@@ -5,8 +5,17 @@
 .tmp/*
 !.tmp/.gitkeep
 
-# Quarry session-transcript captures (pkit-kcps)
-.punt-labs/quarry/captures/
+# Plugin-generated per-repo state. Claude Code clones this repo onto every
+# user's machine when they run `claude plugin marketplace add`, so anything
+# tracked here ships to all consumers. A submodule tracked here is worse than
+# leakage — it breaks the install outright (see CLAUDE.md, "Why This Repo Is
+# Different"). Keep these on disk for local tooling; never commit them.
+.punt-labs/
+.vox/
+.lux/
+.biff
+.beads/
+.claude/agents/
 
 # The mandated sibling lock every punt CLI takes before mutating a shared
 # host file (tool-enable-disable.md 2.4). Per-machine runtime state, and it
