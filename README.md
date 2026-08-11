@@ -8,9 +8,10 @@ Plugin marketplace for [Punt Labs](https://github.com/punt-labs) projects.
 curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/d7679bd/install.sh | sh
 ```
 
-The URL is pinned to a specific commit. The script fetches the marketplace
-catalog, shows available plugins with source repos, displays a sha256 checksum,
-then registers the marketplace with Claude Code.
+The URL is pinned to a specific commit. The script checks that `claude` and
+`git` are installed, then registers this marketplace with Claude Code. To
+inspect it and verify its checksum before running, use the steps under
+"Verify before running" below.
 
 <details>
 <summary>Manual setup (no curl)</summary>

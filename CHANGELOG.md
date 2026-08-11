@@ -1,26 +1,44 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+Notable changes to the marketplace catalog. Version bumps to individual
+plugin entries in `.claude-plugin/marketplace.json` are routine and are not
+logged here — the commit is the record. This file is for changes that affect
+how the marketplace itself installs or behaves.
 
 ## [Unreleased]
 
-### Fixed
+### Fixed — marketplace install failed without a GitHub SSH key
 
-- **Marketplace install no longer fails for users without a GitHub SSH key.** The `.punt-labs/ethos` submodule pointed at `git@github.com:punt-labs/team.git`. `claude plugin marketplace add` clones this repo with submodules, so the SSH URL aborted the clone (`Failed to clone '.punt-labs/ethos' a second time, aborting`) for anyone whose machine could not authenticate to GitHub over SSH. The submodule and `.gitmodules` are removed.
+`claude plugin marketplace add punt-labs/claude-plugins` clones this repo
+**with submodules**. The `.punt-labs/ethos` submodule pointed at
+`git@github.com:punt-labs/team.git`, so any user whose machine could not
+authenticate to GitHub over SSH hit:
 
-### Removed
+```text
+Failed to clone '.punt-labs/ethos' a second time, aborting
+```
 
-- `.punt-labs/` — the `ethos` team submodule (1 MB, 246 files of internal identities, personalities, and writing styles) and `ethos.yaml`. Agents in this repo now resolve identity from the global `~/.punt-labs/ethos/identities/`.
-- `.gitmodules` — this repo carries no submodules by design
-- `.biff` — internal team roster and NATS relay URL
-- `.vox/config.md` and `.lux/config.md` — per-repo voice and display settings
+`punt-labs/team` is public, but SSH auth fails before repo visibility is
+consulted.
 
-  All were plugin-generated local state that shipped to every marketplace consumer via `~/.claude/plugins/marketplaces/punt-labs/`.
+Removed the submodule and `.gitmodules`. An HTTPS URL would have fixed the
+auth failure but would still copy 1 MB of internal identity data onto every
+consumer's disk. Agents working in this repo now resolve identity from the
+global `~/.punt-labs/ethos/identities/`.
 
-### Added
+Also removed the plugin-generated local state that was shipping to every
+consumer via `~/.claude/plugins/marketplaces/punt-labs/`: `.biff` (team
+roster, NATS relay URL), `.punt-labs/ethos.yaml`, `.vox/config.md`, and
+`.lux/config.md`. These are now gitignored, along with `.beads/` and
+`.claude/agents/`, so enabling a plugin in this checkout cannot reintroduce
+the leak.
 
-- `Why This Repo Is Different` section in `CLAUDE.md` — documents that this repo is cloned onto every user's machine, why the org-wide ethos-submodule mandate does not apply here, and the rule that plugin-generated per-repo state is never committed
-- `.gitignore` entries for `.punt-labs/`, `.vox/`, `.lux/`, `.biff`, `.beads/`, and `.claude/agents/` so enabling a plugin in this checkout cannot re-introduce the leak
-- `Ethos & Delegation` section in `CLAUDE.md` with worker/evaluator pairings for catalog work
+`CLAUDE.md` gained a "Why This Repo Is Different" section recording why the
+org-wide ethos-submodule mandate does not apply to a repo that gets cloned
+onto every user's machine.
+
+### Fixed — README described install.sh behavior it never had
+
+The README claimed the script fetches the catalog, lists plugins, and prints
+a sha256 checksum. It does none of those — it checks for `claude` and `git`,
+then registers the marketplace. Corrected to match.
