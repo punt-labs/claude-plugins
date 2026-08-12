@@ -10,7 +10,7 @@ There is no such thing as a "pre-existing" issue. If you see a problem — in co
 
 **This repo is cloned onto every user's machine.** `claude plugin marketplace add punt-labs/claude-plugins` clones it into `~/.claude/plugins/marketplaces/punt-labs/` — and it clones **with submodules**. Everything tracked here is published to every consumer of the marketplace.
 
-Two consequences override the org-wide Punt Labs conventions (which load from
+Three consequences override the org-wide Punt Labs conventions (which load from
 the workspace meta-repo when this repo is checked out as a sibling inside it,
 and are simply absent when it is cloned as a marketplace):
 
@@ -25,7 +25,11 @@ Failed to clone '.punt-labs/ethos' a second time, aborting
 
 **2. No plugin-generated per-repo state.** Vox, lux, biff, ethos, quarry, and beads each deposit config into the repo root when enabled. Those files are local tooling state, not marketplace content — tracking them publishes internal team rosters, relay URLs, and agent identities to every consumer. They are gitignored. Keep them on disk; never commit them.
 
-Before adding **any** file to this repo, ask: should this land in a stranger's `~/.claude/` directory? If not, gitignore it.
+**3. Do not run `<tool> enable` in this checkout.** `/vox enable`, `/biff enable`, `/quarry enable`, `/lux enable`, `z-spec enable`, and the ethos and beadle equivalents do more than write a marker file. Each appends an `@.punt-labs/<tool>/CLAUDE.md` import line to **this** `CLAUDE.md`, which is tracked and must stay tracked. The import *target* is gitignored, so it never ships — the import *line* is in a tracked file, so it always does, and every consumer gets a `CLAUDE.md` pointing at a path that does not exist on their machine. Enablement also writes `.claude/settings.json` and `.github/workflows/biff-notify.yml`, neither of which can be blanket-ignored here.
+
+Gitignoring cannot fix this on its own: an ignore rule protects the file a tool writes, not the tracked file a tool *edits*. If you need one of these tools while working in this repo, enable it globally or in a scratch clone, not here. The CI guard in `.github/workflows/` fails the build on a `^@.punt-labs` line in `CLAUDE.md` — treat that failure as "back the enable out", not "delete the check".
+
+Before adding **any** file to this repo, ask: should this land in a stranger's `~/.claude/` directory? If not, gitignore it. And before running any tool command that writes to the repo, ask what tracked file it edits on the way.
 
 ## Scratch Files
 

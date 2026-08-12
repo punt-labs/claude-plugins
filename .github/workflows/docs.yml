@@ -16,3 +16,89 @@ jobs:
         with:
           globs: "**/*.md"
 
+  # Enforces "Why This Repo Is Different" (CLAUDE.md). `claude plugin
+  # marketplace add punt-labs/claude-plugins` clones this repo onto every
+  # user's machine, with submodules, so the tracked file set IS the published
+  # artifact. Until now that rule existed only as prose; PR #286 had to remove
+  # a submodule and four plugin-state paths after they shipped. Runs on every
+  # push and PR, ~10s, no network beyond the checkout.
+  leak-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: No submodules, no plugin state, no dangling imports
+        run: |
+          # No `set -e`: every check runs and every violation is reported in
+          # one build, so a future agent sees the whole set rather than
+          # fixing them one red build at a time.
+          set -uo pipefail
+          fail=0
+
+          # (a) Submodules do not merely leak, they break the install: the
+          # clone recurses, and an SSH submodule URL fails auth before repo
+          # visibility is consulted, aborting the whole marketplace add. Both
+          # halves are checked because either can exist without the other —
+          # .gitmodules is the wiring, the gitlink is the index entry.
+          if [ -e .gitmodules ]; then
+            echo "FAIL: .gitmodules exists."
+            echo "    A submodule aborts \`claude plugin marketplace add\` for any user"
+            echo "    without a GitHub SSH key. Remove the submodule; resolve identity"
+            echo "    from the global ~/.punt-labs/ethos/ instead."
+            fail=1
+          fi
+          gitlinks=$(git ls-files -s | awk '$1 == "160000"' | cut -f2-)
+          if [ -n "$gitlinks" ]; then
+            echo "FAIL: submodule gitlink(s) tracked in the index:"
+            echo "$gitlinks" | sed 's/^/      /'
+            echo "    Remove with: git rm --cached <path>"
+            fail=1
+          fi
+
+          # (b) Per-repo state deposited by vox, lux, biff, ethos, quarry,
+          # beads, and punt-kit init. Local tooling state, not marketplace
+          # content — tracking it publishes internal rosters, relay URLs, and
+          # one machine's absolute plugin paths to strangers.
+          leaked=$(git ls-files -- \
+            '.biff' '.vox' '.lux' '.beads' '.punt-labs' \
+            '.claude/settings.json' '.claude/hooks' '.claude/agents' \
+            '*.ini')
+          if [ -n "$leaked" ]; then
+            echo "FAIL: plugin-generated state is tracked:"
+            echo "$leaked" | sed 's/^/      /'
+            echo "    These are local tooling state, not catalog content. Untrack with"
+            echo "    \`git rm --cached <path>\`; the paths are already in .gitignore."
+            fail=1
+          fi
+
+          # (c) `<tool> enable` appends an @-import line to the tracked
+          # CLAUDE.md pointing into .punt-labs/, which is gitignored. The
+          # import would ship while its target never does, leaving every
+          # consumer with a CLAUDE.md referencing a path that does not exist.
+          # Asserted, not assumed: a missing CLAUDE.md would make the grep
+          # below vacuous and this check would pass while enforcing nothing.
+          if [ ! -f CLAUDE.md ]; then
+            echo "FAIL: CLAUDE.md is missing, so the import check cannot run."
+            fail=1
+          fi
+          imports=$(grep -n '^@\.punt-labs' CLAUDE.md 2>/dev/null)
+          if [ -n "$imports" ]; then
+            echo "FAIL: CLAUDE.md has plugin import line(s) whose target is gitignored:"
+            echo "$imports" | sed 's/^/      /'
+            echo "    Delete the line. Do not un-ignore .punt-labs/ to satisfy it."
+            fail=1
+          fi
+
+          if [ "$fail" -ne 0 ]; then
+            echo
+            echo "Leak guard failed. Why this matters: everything tracked in this"
+            echo "repo is cloned onto every marketplace consumer's machine, into"
+            echo "~/.claude/plugins/marketplaces/punt-labs/, submodules and all."
+            echo "The tracked file set IS the published artifact. Fix the files"
+            echo "listed above — do not delete this check to get green, it is the"
+            echo "only mechanical enforcement of CLAUDE.md's \"Why This Repo Is"
+            echo "Different\"."
+            exit 1
+          fi
+          echo "OK: no submodules, no plugin state, no dangling imports."
+
