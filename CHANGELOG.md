@@ -75,8 +75,24 @@ printed a warning and exited `0`, so `install-all.sh`, a Dockerfile `RUN`, or
 any CI step saw success: a stale catalog after a failed update, and — worse — a
 registration whose confirming re-list failed, which printed `✓ marketplace
 registered` and "ready!" for something it had explicitly failed to establish.
-That asymmetry gave the *stronger* claim the *weaker* check. Both now exit `2`,
-each with its own banner, and the script header documents all three statuses.
+That asymmetry gave the *stronger* claim the *weaker* check.
+
+`install.sh` now has a three-value contract, documented in its header: `0` both
+registered and current, `1` not registered and could not be, `2` the state
+could not be established. Each `2` prints what it could not determine and the
+one command that resolves it, and the closing "install all tools" pointer is
+suppressed on those paths — it was a confident next step predicated on a
+registration the line above had just said it could not confirm.
+
+**A working install was reported as a registration failure.** If the listing
+succeeded in a format the script's parser did not recognise, it fell through to
+`add`, which failed because the marketplace was already there, and the script
+declared "Failed to register" at exit `1` — directly beneath the CLI's own
+"already exists" message. It now distinguishes the two cases: an *empty*
+successful listing cannot be misparsed, so a failed `add` after one is still a
+real failure at exit `1`; a *non-empty* listing that named nothing recognisable
+might simply be newer than this script, so that path hedges and exits `2`.
+
 `warn` and `fail` also moved to stderr, so a redirected run no longer separates
 the label from its cause, and `fail` is red rather than sharing `warn`'s yellow.
 
@@ -121,22 +137,33 @@ plugin in this checkout cannot reintroduce the leak.
 ### Added
 
 - **`leak-guard` CI job** (`.github/workflows/docs.yml`) — fails the build if a
-  submodule is tracked (`.gitmodules` or a mode-160000 gitlink), if any tracked
-  file is also matched by `.gitignore`, or if any `@`-import in `CLAUDE.md`
-  points somewhere that will not ship. Until now the rule existed only as
-  prose, which is how a submodule shipped in the first place. Every check runs
-  before the job exits, so one build reports every violation.
+  submodule is tracked (`.gitmodules` or a mode-160000 gitlink), or if any
+  tracked file is also matched by `.gitignore`. Until now the rule existed only
+  as prose, which is how a submodule shipped in the first place. Both checks
+  run before the job exits, so one build reports every violation.
 
-  Both of the latter checks are derived rather than enumerated, because a
-  hand-maintained list is a second copy of a rule that drifts — the first
-  version's list had already fallen out of step with `.gitignore` before it
-  merged. Tracked-and-ignored is asked directly of git
-  (`git ls-files | git check-ignore --stdin --no-index`; `--no-index` is
-  load-bearing, since without it `check-ignore` declines to report tracked
-  paths at all and the check silently always passes). The import check tests
-  every `@`-import, not one hardcoded prefix, and distinguishes three ways a
-  target fails to ship: resolving outside the repository, being untracked, or
-  being gitignored.
+  The leak check is derived rather than enumerated, because a hand-maintained
+  list is a second copy of a rule that drifts — the first version's list had
+  already fallen out of step with `.gitignore` before it merged. It asks git
+  directly: `git ls-files | git check-ignore --stdin --no-index`. The
+  `--no-index` is load-bearing; without it `check-ignore` declines to report
+  tracked paths at all and the check silently always passes.
+
+  Deriving from `.gitignore` makes that file the check's entire input, so a
+  deleted rule would disable the check in the same commit that ships the leak.
+  A canary list guards against that: the job asserts `.gitignore` is readable
+  and that each of a set of known paths is still ignored, failing loudly if one
+  stops being covered.
+
+  A third check, validating `CLAUDE.md`'s `@`-import lines, was built and then
+  removed before merge. Classifying an `@`-token in markdown means handling
+  fences, indented blocks, inline code spans, and prose mentions; each rule
+  added to it introduced either a way to miss a real import or a way to fail
+  the build on a correct line — an unclosed fence silenced the rest of the
+  file, and `npm i -g @anthropic-ai/claude-code` in prose failed CI. A dangling
+  import is cosmetic where the other two failures break installs and leak
+  data, and a check that cries wolf on valid documentation undermines the ones
+  that matter.
 
   **This job must be added to the repository's required status checks.** If
   branch protection pins required checks by name, `leak-guard` passes

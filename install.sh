@@ -9,10 +9,12 @@
 #
 # Exit status:
 #   0  the marketplace is registered and current, both confirmed
-#   1  the marketplace could not be registered
-#   2  neither could be established: `add` reported success but the listing
-#      that would confirm it could not be read, or an already-registered
-#      marketplace could not be updated and its catalog may be stale
+#   1  the marketplace is not registered and could not be registered
+#   2  the state could not be established. Three ways in: `add` reported
+#      success but the listing that would confirm it could not be read;
+#      `add` failed while the listing left it unknown whether the
+#      marketplace was already there; or an already-registered marketplace
+#      could not be updated, so its catalog may be stale
 set -eu
 
 # --- Colors (disabled unless both streams are terminals) ---
@@ -68,9 +70,11 @@ fi
 
 info "Registering Punt Labs marketplace..."
 
-# Empty means "ready". Otherwise it holds the rest of the closing banner's
-# first sentence, and is the reason this script exits 2.
+# Empty CAVEAT means "ready". Otherwise it holds the rest of the closing
+# banner's first sentence, and is the reason this script exits 2. Set NEXT
+# with it: the one command that resolves that caveat.
 CAVEAT=''
+NEXT=''
 REGISTERED=''
 UNKNOWN=''
 
@@ -94,6 +98,7 @@ if [ -n "$REGISTERED" ]; then
     ok "marketplace updated"
   else
     CAVEAT='is registered, but the catalog may be stale.'
+    NEXT="claude plugin marketplace update $MARKETPLACE_NAME"
     warn "update failed (exit $UPDATE_RC); the local catalog may be stale"
     why "$UPDATE_OUT"
     warn "retry with: claude plugin marketplace update $MARKETPLACE_NAME"
@@ -103,6 +108,7 @@ elif claude plugin marketplace add "$MARKETPLACE_REPO" < /dev/null; then
   VERIFY=$(claude plugin marketplace list < /dev/null 2>&1) && VERIFY_RC=0 || VERIFY_RC=$?
   if [ "$VERIFY_RC" -ne 0 ]; then
     CAVEAT='registration was reported, but could not be confirmed.'
+    NEXT="claude plugin marketplace list"
     warn "'add' reported success, but the confirming re-list failed (exit $VERIFY_RC)"
     why "$VERIFY"
     warn "check by hand: claude plugin marketplace list"
@@ -112,11 +118,19 @@ elif claude plugin marketplace add "$MARKETPLACE_REPO" < /dev/null; then
     why "$VERIFY"
     fail "'claude plugin marketplace add' reported success, but '$MARKETPLACE_NAME' is not in the listing above"
   fi
-elif [ -n "$UNKNOWN" ]; then
-  # The listing failed, so a rejected add may only mean it was already there.
-  # Report what we know instead of guessing from the error text above.
-  warn "could not determine whether '$MARKETPLACE_NAME' was already registered"
-  fail "and registering '$MARKETPLACE_REPO' failed too (error above). Check by hand: claude plugin marketplace list"
+elif [ -n "$UNKNOWN" ] || [ -n "$LISTING" ]; then
+  # A rejected `add` may only mean it was already there. Two ways to be unsure:
+  # the listing could not be read, or it was read and named nothing we know —
+  # which is also how a listing format newer than listed() looks.
+  warn "registering '$MARKETPLACE_REPO' failed (error above)"
+  if [ -n "$UNKNOWN" ]; then
+    warn "and whether '$MARKETPLACE_NAME' was already registered could not be determined"
+  else
+    warn "and '$MARKETPLACE_NAME' was not in this listing, which this script may be too old to read:"
+    why "$LISTING"
+  fi
+  CAVEAT='could not be added; if it is already registered, this script could not tell.'
+  NEXT="claude plugin marketplace list"
 else
   fail "Failed to register marketplace '$MARKETPLACE_REPO'"
 fi
@@ -125,11 +139,13 @@ fi
 
 if [ -n "$CAVEAT" ]; then
   printf '\n%b%bPunt Labs marketplace %s%b\n\n' "$YELLOW" "$BOLD" "$CAVEAT" "$NC"
+  printf 'Do this next:\n'
+  printf '  %s\n' "$NEXT"
 else
   printf '\n%b%bPunt Labs marketplace is ready!%b\n\n' "$GREEN" "$BOLD" "$NC"
+  printf 'Install all tools and plugins:\n'
+  printf '  See https://github.com/punt-labs for the install-all.sh command.\n'
 fi
-printf 'Install all tools and plugins:\n'
-printf '  See https://github.com/punt-labs for the install-all.sh command.\n'
 
 # A human has read the banner by now; 2 is how a script learns the same thing.
 [ -z "$CAVEAT" ] || exit 2

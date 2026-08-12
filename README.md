@@ -35,11 +35,24 @@ claude plugin marketplace add punt-labs/claude-plugins
 <summary>Inspect before running</summary>
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/2a7e501/install.sh -o install.sh
-shasum -a 256 install.sh
-cat install.sh
+curl -fsSL --remove-on-error https://raw.githubusercontent.com/punt-labs/claude-plugins/2a7e501/install.sh -o install.sh && cat install.sh
+```
+
+Read it, then run it as a separate, deliberate step:
+
+```bash
 sh install.sh
 ```
+
+The download uses the same `&&` and `--remove-on-error` as the Quick Start, and
+for the same reason: a block that is pasted whole must not run a stale
+`install.sh` left over in the current directory when the download fails.
+
+There is deliberately no `shasum` step here. A digest is only worth computing
+if there is a published one to compare it against, and this project does not
+publish one — the commit SHA in the URL is what pins the content, and GitHub
+serves that path immutably. Printing a hash with nothing to check it against
+looks like verification without being any.
 
 </details>
 
