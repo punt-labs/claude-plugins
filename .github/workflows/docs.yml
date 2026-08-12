@@ -6,6 +6,20 @@ on:
   pull_request:
     branches: [main]
 
+# Least-privilege GITHUB_TOKEN. Without this block both jobs inherit the
+# repository default, which on many repos is read/write — CodeQL flagged it on
+# leak-guard, but docs had the identical exposure, so the grant is set once at
+# workflow level rather than on the flagged job. That also means a job added
+# here later inherits a safe default instead of the repository's.
+#
+# contents: read is the entire requirement. Both jobs do nothing but read a
+# checkout: docs runs markdownlint over the working tree, leak-guard runs git
+# plumbing (ls-files, check-ignore) against the local index. Neither writes
+# contents, posts a comment, or touches checks, packages, or releases. Widen
+# in the job that needs it, never here.
+permissions:
+  contents: read
+
 jobs:
   docs:
     runs-on: ubuntu-latest
