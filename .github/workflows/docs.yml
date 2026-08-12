@@ -418,7 +418,7 @@ jobs:
               if [ "$(printf '%s\n' "$shas" | wc -l)" -ne 1 ]; then
                 echo "FAIL: README.md pins the installer to more than one commit:"
                 printf '%s\n' "$shas" | sed 's/^/      /'
-                echo "    Every occurrence, as README.md:<line>:<url>:"
+                echo "    Every occurrence in README.md, as <line>:<url>:"
                 printf '%s\n' "$pins" | sed 's/^/      /'
                 echo "    At most one of these can match the installer this repo ships, so"
                 echo "    a reader who copies the Quick Start and a reader who copies the"
