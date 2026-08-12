@@ -94,6 +94,13 @@ absence rather than searching for the string `punt-labs`: the marketplace
 directory is itself called `punt-labs`, so any such search matches the
 directory and everything under it and can never come back empty.
 
+Removing the whole `.punt-labs/` directory rather than just `.punt-labs/ethos`
+is deliberate and safe. Its only occupants were the `ethos` submodule and
+`ethos.yaml`, both of which this repo stopped tracking, and `.punt-labs/` is
+now gitignored here with a CI check that fails the build if anything under it
+becomes tracked again. Nothing legitimate can appear there in a future
+marketplace clone, so there is nothing narrower worth preserving.
+
 Check the output rather than assuming. `rm -rf` on a path that does not exist
 prints nothing and exits `0`, so silence on its own does not distinguish
 "cleared" from "wrong path" — which is why the first line aborts instead of
