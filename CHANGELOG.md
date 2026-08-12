@@ -42,3 +42,8 @@ onto every user's machine.
 The README claimed the script fetches the catalog, lists plugins, and prints
 a sha256 checksum. It does none of those — it checks for `claude` and `git`,
 then registers the marketplace. Corrected to match.
+
+### Added
+
+- `Ethos & Delegation` section in `CLAUDE.md` with worker/evaluator pairings
+  for catalog work
