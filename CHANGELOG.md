@@ -112,7 +112,15 @@ against a known-good fixture and fails with a message naming what to install.
 straight into a shell. With `curl -f`, an HTTP error prints nothing to stdout,
 `sh` reads empty input, and the pipeline exits `0` — a 404 from a force-pushed
 history or a captive-portal proxy was indistinguishable from a successful
-install. Quick Start now downloads and runs as two steps.
+install. Both install blocks now download and run as `&&`-joined steps guarded
+by `[ -s install.sh ]`, so a failed download stops the chain and an empty one
+is checked rather than executed.
+
+The portable test is deliberate. `--remove-on-error` expresses the second guard
+more neatly but requires curl 7.83.0, and Ubuntu 22.04 LTS ships 7.81.0 while
+Debian 11 ships 7.74.0 — on both, curl rejects the unknown option and exits `2`
+before fetching anything, so a flag added for safety would have meant no
+install at all on two supported distributions.
 
 **Existing installs kept the leaked identity data.** Removing the submodule
 upstream does not remove it from a consumer's working tree: git cannot delete a
