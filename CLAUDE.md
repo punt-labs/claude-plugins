@@ -6,6 +6,27 @@ This repo is the Punt Labs plugin marketplace catalog for Claude Code.
 
 There is no such thing as a "pre-existing" issue. If you see a problem — in code you wrote, code a reviewer flagged, or code you happen to be reading — you fix it. Do not classify issues as "pre-existing" to justify ignoring them. Do not suggest that something is "outside the scope of this change." If it is broken and you can see it, it is your problem now.
 
+## Why This Repo Is Different
+
+**This repo is cloned onto every user's machine.** `claude plugin marketplace add punt-labs/claude-plugins` clones it into `~/.claude/plugins/marketplaces/punt-labs/` — and it clones **with submodules**. Everything tracked here is published to every consumer of the marketplace.
+
+Two consequences override the org-wide Punt Labs conventions (which load from
+the workspace meta-repo when this repo is checked out as a sibling inside it,
+and are simply absent when it is cloned as a marketplace):
+
+**1. No git submodules. Ever.** The org rule "every project adds `punt-labs/team` as a submodule at `.punt-labs/ethos/`" does **not** apply here. It was added to this repo and broke the marketplace install: `.gitmodules` used the SSH URL `git@github.com:punt-labs/team.git`, so any user without a GitHub SSH key hit
+
+```text
+fatal: clone of 'git@github.com:punt-labs/team.git' into submodule path ... failed
+Failed to clone '.punt-labs/ethos' a second time, aborting
+```
+
+`punt-labs/team` being public does not help — SSH authentication fails before repo visibility is consulted. Switching to an HTTPS URL would fix the auth failure but would still push 1 MB of internal identity data (246 files: identities, personalities, writing styles) onto every user's disk. The submodule is removed. Agents working in this repo resolve identity from the global `~/.punt-labs/ethos/identities/` instead.
+
+**2. No plugin-generated per-repo state.** Vox, lux, biff, ethos, quarry, and beads each deposit config into the repo root when enabled. Those files are local tooling state, not marketplace content — tracking them publishes internal team rosters, relay URLs, and agent identities to every consumer. They are gitignored. Keep them on disk; never commit them.
+
+Before adding **any** file to this repo, ask: should this land in a stranger's `~/.claude/` directory? If not, gitignore it.
+
 ## Scratch Files
 
 Use `.tmp/` at the project root for scratch and temporary files — never `/tmp`. The `TMPDIR` environment variable is set via `.envrc` so that `tempfile` and subprocesses automatically use it. Contents are gitignored; only `.gitkeep` is tracked.
@@ -56,7 +77,7 @@ Do **not** merge immediately after creating a PR. Expect **2–6 review cycles**
 
 This repo is the marketplace catalog. Most edits are direct: bump a version in `.claude-plugin/marketplace.json`, update `README.md`, regenerate `install.sh` SHA pins. The work is small, mechanical, and rarely benefits from a multi-stage pipeline. The review pairing still matters — a release-distribution change that breaks `install.sh` invalidates every consumer.
 
-**Identity** — `agent: claude` per `.punt-labs/ethos.yaml`. Claude (the leader) is never the evaluator; pair every change with a specialist below.
+**Identity** — `agent: claude`, resolved from the global `~/.punt-labs/ethos/identities/` (this repo tracks no ethos config — see "Why This Repo Is Different"). Claude (the leader) is never the evaluator; pair every change with a specialist below.
 
 | Task type | Worker | Evaluator |
 |-----------|--------|-----------|
