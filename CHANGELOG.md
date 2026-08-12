@@ -10,6 +10,10 @@ that affect how the marketplace itself installs or behaves.
 
 ### Fixed
 
+**The advertised installer was two commits behind the one in the repo.** The
+README pinned `2a7e501`, which predates the installer rewrite below. Both URLs
+now pin the commit that carries it, and `pin-guard` reports it next time.
+
 **Marketplace install failed for users without a GitHub SSH key.**
 `claude plugin marketplace add punt-labs/claude-plugins` clones this repo
 **with submodules**. The `.punt-labs/ethos` submodule pointed at
@@ -29,8 +33,9 @@ from the global `~/.punt-labs/ethos/identities/`.
 **The pinned installer URL served a stale script.** `README.md` pinned the
 `curl` one-liner to commit `d7679bd`, but `install.sh` changed afterward in
 `2a7e501`, so the advertised installer still printed the `main`-pinned example
-URLs that commit removed. Both URLs now pin to `2a7e501`, which is on `main`
-and carries the current script.
+URLs that commit removed. The pin moved to `2a7e501` at the time; it has since
+moved again to `aa5a34d`, per the entry above, because the installer rewrite in
+this same release superseded it.
 
 **README described `install.sh` behavior it never had.** It claimed the script
 fetches the catalog, lists plugins, and prints a sha256 checksum. It does none
@@ -156,6 +161,24 @@ plugin in this checkout cannot reintroduce the leak.
 
 ### Added
 
+- **`pin-guard` CI job** — asserts the commit pinned in `README.md` carries
+  byte-identical `install.sh` to the repo's. The pin has gone stale twice, both
+  times caught by a human reviewer and never by anything mechanical, which is
+  the definition of a check worth having.
+
+  It is a **separate job and must never be made a required status check.** A
+  pin can only name a commit that already exists, so the PR that changes
+  `install.sh` cannot pin to itself and no edit makes it green; requiring the
+  job would leave `install.sh` permanently unmergeable. Red is a report, not a
+  gate. The intended sequence — the `install.sh` change merges, main goes red,
+  the re-pin PR opens immediately, main returns green — is recorded in the
+  job's comment and repeated in its failure output, because the obvious "fix"
+  for a red main is to require the check, which recreates the trap.
+
+  It checks out with `fetch-depth: 0`: the pinned commit is absent from a
+  shallow clone, and `git diff` against a missing object aborts the step as an
+  unexplained red rather than a reported drift. Unresolvable and drifted pins
+  are reported as distinct outcomes for the same reason.
 - **`leak-guard` CI job** (`.github/workflows/docs.yml`) — fails the build if a
   submodule is tracked (`.gitmodules` or a mode-160000 gitlink), or if any
   tracked file is also matched by `.gitignore`. Until now the rule existed only

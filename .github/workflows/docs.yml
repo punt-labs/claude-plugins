@@ -6,17 +6,19 @@ on:
   pull_request:
     branches: [main]
 
-# Least-privilege GITHUB_TOKEN. Without this block both jobs inherit the
+# Least-privilege GITHUB_TOKEN. Without this block every job inherits the
 # repository default, which on many repos is read/write — CodeQL flagged it on
 # leak-guard, but docs had the identical exposure, so the grant is set once at
 # workflow level rather than on the flagged job. That also means a job added
-# here later inherits a safe default instead of the repository's.
+# here later inherits a safe default instead of the repository's — pin-guard
+# did, and needed no permissions block of its own.
 #
-# contents: read is the entire requirement. Both jobs do nothing but read a
-# checkout: docs runs markdownlint over the working tree, leak-guard runs git
-# plumbing (ls-files, check-ignore) against the local index. Neither writes
-# contents, posts a comment, or touches checks, packages, or releases. Widen
-# in the job that needs it, never here.
+# contents: read is the entire requirement. All three jobs do nothing but read
+# a checkout: docs runs markdownlint over the working tree, leak-guard runs git
+# plumbing (ls-files, check-ignore) against the local index, pin-guard runs
+# cat-file and diff against the local object store. None writes contents, posts
+# a comment, or touches checks, packages, or releases. Widen in the job that
+# needs it, never here.
 permissions:
   contents: read
 
@@ -36,10 +38,19 @@ jobs:
   # artifact. Until now that rule existed only as prose; PR #286 had to remove
   # a submodule and four plugin-state paths after they shipped. Runs on every
   # push and PR, ~10s, no network beyond the checkout.
+  #
+  # This job is intended to be a REQUIRED status check: every failure it
+  # reports is fixable inside the PR that causes it — untrack the file, restore
+  # the .gitignore rule — so blocking on it can never deadlock. The installer
+  # pin check does not have that property and therefore lives in pin-guard
+  # below, deliberately separate. Do not move it back in here; the reason is
+  # written out at that job.
   leak-guard:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      # Default fetch-depth: 1 is correct here. Every check in this job asks
+      # about the index and the work tree, never about history.
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: No submodules, no tracked plugin state
         run: |
@@ -83,7 +94,10 @@ jobs:
           gitlinks=$(printf '%s\n' "$index" | awk '$1 == "160000"' | cut -f2-)
           if [ -n "$gitlinks" ]; then
             echo "FAIL: submodule gitlink(s) tracked in the index:"
-            echo "$gitlinks" | sed 's/^/      /'
+            # printf, not echo: this prints a path that came from the index,
+            # and bash's echo swallows a leading -n/-e. Every other variable
+            # in this block is printed the same way.
+            printf '%s\n' "$gitlinks" | sed 's/^/      /'
             echo "    Remove with: git rm --cached <path>"
             fail=1
           fi
@@ -253,7 +267,252 @@ jobs:
             echo "only mechanical enforcement of CLAUDE.md's \"Why This Repo Is"
             echo "Different\". Note this job does not inspect @-import lines in"
             echo "CLAUDE.md; keeping those correct is still a human review step."
+            echo "The installer URL pinned in README.md is checked separately, by"
+            echo "the pin-guard job; nothing here says anything about it."
             exit 1
           fi
           echo "OK: no submodules tracked, and nothing tracked that .gitignore excludes."
+
+  # Guards the OTHER install path. leak-guard covers `claude plugin marketplace
+  # add`, which clones the whole repo; this covers the curl command in README's
+  # Quick Start, which fetches ONE file from one pinned commit. GitHub serves a
+  # commit-pinned raw URL immutably, which is the point of pinning and also the
+  # failure mode: change install.sh without moving the pin and the advertised
+  # installer stays the old one forever. It has gone stale twice — #286 changed
+  # install.sh and left the pin behind, #288 changed install.sh again in the
+  # very PR that claimed to fix the installer — and both times a human reviewer
+  # caught it. Nothing mechanical did. Runs on every push and PR, ~10s, no
+  # network beyond the checkout.
+  #
+  # THIS JOB MUST NOT BECOME A REQUIRED STATUS CHECK. The deadlock is airtight,
+  # so read it before "fixing" a red main by adding pin-guard to branch
+  # protection: a pin can only name a commit that ALREADY EXISTS, so the PR
+  # that changes install.sh cannot pin to itself, and no other value passes
+  # either — the only commit whose install.sh matches is the one that PR would
+  # become, which the required check would be blocking from merging. No edit
+  # turns that PR green. Requiring this job trades "the README may advertise a
+  # stale installer for a few hours" for "install.sh can never be changed
+  # again". A visible red X is the entire requirement here; enforcement is not.
+  # leak-guard is the opposite case — every failure it reports is fixable
+  # inside the offending PR — which is why that one is meant to be required and
+  # this one is not.
+  #
+  # Intended sequence. The red at step 2 is expected and bounded, not a broken
+  # build:
+  #   1. A PR changes install.sh. leak-guard stays green; pin-guard goes red;
+  #      the PR merges anyway, because this job is not required.
+  #   2. main is red on pin-guard. The README does now advertise an installer
+  #      the repo no longer contains — an accurate report of a real defect.
+  #   3. The re-pin PR opens immediately, moving every installer URL in
+  #      README.md to the SHA that install.sh change merged as. It goes green
+  #      here, because that commit now exists.
+  #   4. main returns green; the window is closed.
+  # Step 3 being immediate is a process, not a gate — it is the one thing this
+  # design cannot enforce, and the reason the red must stay loud.
+  #
+  # Scope decision, recorded so it is not re-litigated: the pattern matches a
+  # fully-formed raw.githubusercontent.com .../install.sh URL ANYWHERE in
+  # README.md — prose and fenced blocks alike. A bare SHA in a sentence ("the
+  # fix landed in 2a7e501", as the CHANGELOG writes them) does NOT match and
+  # cannot trip this; only a complete, copy-and-runnable URL does, and a reader
+  # can copy one of those wherever it sits. Strict on purpose. To reference a
+  # historical installer in prose, link the blob view instead —
+  # github.com/punt-labs/claude-plugins/blob/<sha>/install.sh — which is not
+  # runnable and does not match.
+  pin-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # fetch-depth: 0 — full history, and load-bearing. This job resolves the
+      # commit SHA that README.md pins the installer URL to, and
+      # `git diff <sha> HEAD` needs that commit object present locally. The
+      # default fetch-depth: 1 fetches HEAD alone, so every pin but the newest
+      # resolves to "bad object" (`fatal: bad revision`, rc=128), which under
+      # `set -e` aborts the step: an unexplained red rather than a pin report.
+      #
+      # The alternative was a targeted `git fetch --depth=1 origin <sha>` after
+      # parsing the pin. Rejected on three counts: it puts a network call in
+      # the middle of what is otherwise a local git question, so a transient
+      # fetch failure becomes indistinguishable from a bad pin; it depends on
+      # the checkout's persisted credentials and on GitHub answering want-SHA
+      # requests, two things that can change under us; and it cannot be
+      # reproduced by running this block against a plain local clone, which is
+      # how it gets tested. Full history costs 528 KiB packed against 124 KiB
+      # shallow (+404 KiB over 392 commits) — sub-second on a runner, bounded
+      # by a catalog repo that holds no binaries. Revisit if that stops being
+      # true.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+      - name: README pins the installer this repo ships
+        run: |
+          # Declared although the runner already invokes this as `bash -e {0}`,
+          # so that running the block locally against a clone reproduces CI
+          # exactly. `|| true` is banned here for the same reason as in
+          # leak-guard: it cannot tell "found nothing" from "could not look".
+          # Every command below branches on its exit status and accumulates
+          # into $fail, so one build reports every problem it found.
+          set -euo pipefail
+          fail=0
+
+          # Why this job exists, why it is not a required check, and when its
+          # red is expected are all at the job comment above; they are not
+          # repeated here, because two copies of a rationale drift apart. What
+          # follows is about the code.
+          #
+          # This is a local git question, not a network one: the pinned commit
+          # is in the object store (fetch-depth: 0 on the checkout above), so
+          # `git diff` answers "is the advertised install.sh byte-identical to
+          # ours" with no fetch. It compares HEAD, not the work tree — on a
+          # pull_request run HEAD is the merge commit, so the answer is about
+          # the state the PR produces, which is the state consumers get.
+          #
+          # Four outcomes, kept distinct because collapsing them is how the
+          # sibling leak-guard job's early versions misreported: no pin at all,
+          # disagreeing pins, an unresolvable pin (a checkout problem), and
+          # drift. Only the last one means the pin is stale, and only it says
+          # anything about the README being wrong.
+          #
+          # One consequence of pinning to a commit on a PR branch rather than
+          # to one on main: after a squash merge it is reachable only from
+          # refs/pull/*, which fetch-depth: 0 does not fetch, so main would
+          # then report it as an unresolvable pin. Pin to commits on main.
+          pin_re='https://raw\.githubusercontent\.com/punt-labs/claude-plugins/[0-9a-fA-F]{7,40}/install\.sh'
+          pin=""
+          if [ ! -r README.md ]; then
+            echo "FAIL: README.md is missing or unreadable, so the installer pin could"
+            echo "    not be read. The pinned URL is this check's entire input, so"
+            echo "    without it the check would pass vacuously."
+            fail=1
+          else
+            pins=""
+            if pins=$(grep -nEo "$pin_re" README.md); then
+              prc=0
+            else
+              # $? is only the grep status inside this else; after a completed
+              # `if` it is the status of the `if`. Same trap as the canary loop.
+              prc=$?
+            fi
+            if [ "$prc" -gt 1 ]; then
+              echo "FAIL: \`grep\` exited $prc reading README.md, so the installer pin"
+              echo "    could not be extracted. That is a tooling failure, not pin drift."
+              fail=1
+            elif [ "$prc" -eq 1 ]; then
+              echo "FAIL: README.md advertises no commit-pinned installer URL. Expected"
+              echo "    at least one occurrence of:"
+              echo "      https://raw.githubusercontent.com/punt-labs/claude-plugins/<sha>/install.sh"
+              echo "    where <sha> is 7-40 hex characters. Two near-misses do NOT count"
+              echo "    and are why this is a failure rather than a skip: a branch-pinned"
+              echo "    URL (.../main/install.sh) serves whatever main holds at fetch"
+              echo "    time, which is the unpinned install #111 removed; and an"
+              echo "    abbreviation shorter than 7 characters is not accepted here"
+              echo "    because git resolves it ambiguously — lengthen it."
+              echo "    Do not delete this check to get green. With no pin to compare"
+              echo "    against, it would pass while the README advertises an installer"
+              echo "    nothing verifies."
+              fail=1
+            else
+              # tr collapses case so that two URLs differing only in hex case
+              # are one pin, not a disagreement between identical SHAs.
+              shas=$(printf '%s\n' "$pins" | sed -E 's#^.*/claude-plugins/([0-9a-fA-F]+)/install\.sh$#\1#' | tr '[:upper:]' '[:lower:]' | sort -u)
+              if [ "$(printf '%s\n' "$shas" | wc -l)" -ne 1 ]; then
+                echo "FAIL: README.md pins the installer to more than one commit:"
+                printf '%s\n' "$shas" | sed 's/^/      /'
+                echo "    Every occurrence in README.md, as <line>:<url>:"
+                printf '%s\n' "$pins" | sed 's/^/      /'
+                echo "    At most one of these can match the installer this repo ships, so"
+                echo "    a reader who copies the Quick Start and a reader who copies the"
+                echo "    inspect-before-running block get different scripts and at least"
+                echo "    one gets the wrong one. Re-pin every occurrence to the same"
+                echo "    commit in a single edit."
+                fail=1
+              else
+                pin="$shas"
+              fi
+            fi
+          fi
+          if [ -n "$pin" ]; then
+            if ! git cat-file -e "${pin}^{commit}" 2>/dev/null; then
+              echo "FAIL: README.md pins the installer to commit $pin, which does not"
+              echo "    resolve to a commit object in this checkout. Read this as a"
+              echo "    CHECKOUT problem, not a stale pin — the pin has not been compared"
+              echo "    to anything yet, so nothing here says it is wrong."
+              echo "    Most likely: this job's actions/checkout lost \`fetch-depth: 0\`."
+              echo "    The default fetch-depth: 1 fetches HEAD alone, so every pin but"
+              echo "    the newest is absent and reports exactly like this."
+              echo "    If fetch-depth: 0 is set, the pinned commit is reachable from no"
+              echo "    branch or tag here — typically a squashed or force-pushed branch,"
+              echo "    since fetch-depth: 0 does not fetch refs/pull/*. Re-pin to a"
+              echo "    commit on main. (An ambiguous short SHA lands here too; lengthen"
+              echo "    the abbreviation if git reports ambiguity.)"
+              fail=1
+            else
+              drift=""
+              if drift=$(git diff "$pin" HEAD -- install.sh); then
+                if [ -n "$drift" ]; then
+                  # The diff is evidence, not the message, and install.sh has
+                  # been rewritten wholesale before — the full diff of that
+                  # change is 150+ lines, enough to push the instruction out of
+                  # a reader's screen. Capped, with the command to see the rest.
+                  # sed truncates rather than head: `printf | head -n 40` closes
+                  # the pipe early, and with pipefail that non-zero status ends
+                  # the step under -e, losing every check after this one.
+                  cap=40
+                  n=$(printf '%s\n' "$drift" | wc -l | tr -d ' ')
+                  echo "FAIL: README.md advertises a different install.sh than this repo ships."
+                  echo "    Advertised: commit $pin — what the README's curl command"
+                  echo "                actually fetches. raw.githubusercontent.com serves"
+                  echo "                that path immutably, so it never catches up by itself."
+                  echo "    Shipped:    HEAD $(git rev-parse --short HEAD) — differs by $n diff lines."
+                  echo "    Below, a/ is the advertised script and b/ is the shipped one:"
+                  printf '%s\n' "$drift" | sed -n "1,${cap}p" | sed 's/^/      /'
+                  if [ "$n" -gt "$cap" ]; then
+                    echo "      [$((n - cap)) more lines. Full diff: git diff $pin HEAD -- install.sh]"
+                  fi
+                  echo "    Fix by MOVING THE PIN, not by deleting this check: update every"
+                  echo "    installer URL in README.md to a commit whose install.sh is"
+                  echo "    byte-identical to the shipped one — normally the commit that"
+                  echo "    carries the change (\`git rev-parse --short HEAD\` on main after"
+                  echo "    it lands; on a pull_request run HEAD is an ephemeral merge"
+                  echo "    commit, so do not pin to the SHA printed above)."
+                  echo "    The pin must move in the same change as any install.sh edit,"
+                  echo "    and where that is impossible — a commit cannot name its own"
+                  echo "    SHA — in the immediate follow-up. See the note below."
+                  fail=1
+                fi
+              else
+                drc=$?
+                echo "FAIL: \`git diff $pin HEAD -- install.sh\` exited $drc; the pinned"
+                echo "    installer could not be compared, so this is a tooling failure"
+                echo "    rather than pin drift."
+                fail=1
+              fi
+            fi
+          fi
+
+          if [ "$fail" -ne 0 ]; then
+            echo
+            echo "pin-guard failed. WHICH failure is stated above, and they are not"
+            echo "interchangeable: a stale pin, disagreeing pins, no pin at all, and"
+            echo "a pin this checkout cannot resolve are four problems with four"
+            echo "different fixes. Only the first means the README is advertising the"
+            echo "wrong installer; the last is a problem with this job, not the README."
+            echo
+            echo "Why the pin matters at all: the curl command in README's Quick Start"
+            echo "is the install path for everyone who does not clone, and GitHub"
+            echo "serves a pinned raw URL immutably, so a wrong pin hands them a"
+            echo "different script indefinitely."
+            echo
+            echo "This job is deliberately NOT a required status check, and must not"
+            echo "be made one. A pin can only name a commit that already exists, so"
+            echo "the PR that changes install.sh cannot pin to itself and no edit"
+            echo "makes it green; requiring this job would leave install.sh"
+            echo "permanently unmergeable. Red here is a report, not a gate. Merge"
+            echo "the install.sh change, then open the re-pin PR immediately — main"
+            echo "stays red in between and that is an accurate description of the"
+            echo "README. Fix the pin; do not delete the check, and do not require"
+            echo "it."
+            exit 1
+          fi
+          echo "OK: README.md pins the installer to the install.sh this repo ships."
 
