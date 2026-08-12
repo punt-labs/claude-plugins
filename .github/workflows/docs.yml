@@ -101,17 +101,35 @@ jobs:
           # "do not delete this check" is no defence when the check can be
           # switched off from outside itself.
           #
-          # The canaries are one path per rule this job relies on, because a
-          # single canary only pins its own rule: with .claude/settings.json
-          # still ignored, deleting just the .github/workflows/biff-notify.yml
-          # line returned OK at rc=0 while that file stayed tracked — the very
-          # file recorded above as the historical miss.
+          # One canary per rule, because a canary only ever pins its own rule.
+          # An earlier version pinned four, all taken from .gitignore's
+          # "narrower paths" block, and left the main block above it unpinned.
+          # Deleting the single `.punt-labs/` line was then enough to track
+          # .punt-labs/ethos/identities/claude.yaml — a plain `git add`, no -f
+          # needed — and this job reported OK at rc=0. That is the team
+          # registry vendored as ordinary files: the leak the footer names as
+          # the reason the job exists. Check (a) does not cover it, because
+          # de-submoduled files are not a submodule.
           #
-          # Be clear about the limit: this list cannot cover rules added to
-          # .gitignore later, so it is a floor, not a proof. A line count or
-          # checksum would be worse — both pass on a .gitignore whose rules
-          # were swapped wholesale — but neither this nor those makes the file
-          # tamper-proof.
+          # The list below is therefore derived from .gitignore line by line,
+          # and each path is chosen to match exactly ONE rule so a deleted rule
+          # produces a named failure instead of a silent narrowing. --no-index
+          # means none of these need to exist on disk.
+          #
+          # Every rule in .gitignore is pinned except `!.tmp/.gitkeep`, which
+          # needs no canary: it is a negation, and deleting it makes a TRACKED
+          # file ignored, which check (b) reports directly.
+          #
+          # Two limits this list does NOT close, named so nobody assumes they
+          # are covered:
+          #   1. It cannot know about a rule added to .gitignore after it was
+          #      written. Adding a rule means adding a canary here.
+          #   2. It detects coverage NARROWING, never WIDENING. Replacing
+          #      `.claude/settings.json` with `.claude/` leaves every canary
+          #      green while the next `git add -A` silently stops tracking
+          #      .claude/hooks/check-branch.sh — the exact failure .gitignore
+          #      argues against in prose where it declines to ignore that
+          #      directory. Nothing here detects that; review does.
           if [ ! -f .gitignore ]; then
             echo "FAIL: .gitignore is missing. Every rule the leak check applies"
             echo "    lives there, so without it the check passes vacuously."
@@ -121,11 +139,25 @@ jobs:
             echo "    and the leak check would pass vacuously."
             fail=1
           fi
-          for canary in \
-            '.claude/settings.json' \
-            '.github/workflows/biff-notify.yml' \
-            'imgui.ini' \
-            'Lux.ini'; do
+          # canary path                             # .gitignore rule it pins
+          canaries=(
+            'notes.local'                           # *.local
+            'settings.local.json'                   # *.local.*
+            '.tmp/scratch'                          # .tmp/*
+            '.punt-labs/ethos/identities/x.yaml'    # .punt-labs/
+            '.vox/vox.md'                           # .vox/
+            '.lux/lux.md'                           # .lux/
+            '.biff'                                 # .biff
+            '.beads/config.yaml'                    # .beads/
+            '.claude/agents/adb.md'                 # .claude/agents/
+            '.claude/settings.json'                 # .claude/settings.json
+            '.github/workflows/biff-notify.yml'     # .github/workflows/biff-notify.yml
+            'imgui.ini'                             # imgui.ini
+            'Lux.ini'                               # Lux.ini
+            'Lux_Display.ini'                       # Lux_*.ini
+            '.CLAUDE.md.lock'                       # .*.lock
+          )
+          for canary in "${canaries[@]}"; do
             # $? must be read inside the else branch: after a completed `if`
             # with no else, $? is the status of the `if` itself (0), not the
             # condition's — which reported every canary regression as a git

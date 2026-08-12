@@ -155,15 +155,22 @@ plugin in this checkout cannot reintroduce the leak.
   and that each of a set of known paths is still ignored, failing loudly if one
   stops being covered.
 
-  A third check, validating `CLAUDE.md`'s `@`-import lines, was built and then
-  removed before merge. Classifying an `@`-token in markdown means handling
-  fences, indented blocks, inline code spans, and prose mentions; each rule
-  added to it introduced either a way to miss a real import or a way to fail
-  the build on a correct line — an unclosed fence silenced the rest of the
-  file, and `npm i -g @anthropic-ai/claude-code` in prose failed CI. A dangling
-  import is cosmetic where the other two failures break installs and leak
-  data, and a check that cries wolf on valid documentation undermines the ones
-  that matter.
+  A third check, validating `CLAUDE.md`'s `@`-import lines, was built over four
+  rounds and then removed before merge. Classifying an `@`-token in markdown
+  means handling fences, indented blocks, inline code spans, and prose
+  mentions, and every rule added to it introduced either a way to miss a real
+  import or a way to fail the build on a correct line. It flagged this file's
+  own backticked `@.punt-labs/<tool>/CLAUDE.md` — the passage explaining the
+  rule — so inline code spans were excluded; that exclusion is what let an
+  unclosed fence invert the parser's state and silence every import after it,
+  which is the vacuous pass the check existed to prevent. Locally it also
+  failed on `npm i -g @anthropic-ai/claude-code`, a line that belongs in a
+  marketplace catalog for a tool published under that scope.
+
+  A dangling import is cosmetic — Claude Code ignores a target that is not
+  there — where a tracked submodule breaks the install and a tracked ignored
+  file leaks internal data. A check that cries wolf on correct documentation
+  spends the credibility of the checks that matter.
 
   **This job must be added to the repository's required status checks.** If
   branch protection pins required checks by name, `leak-guard` passes
