@@ -8,9 +8,11 @@
 # One pinned URL, in one place.
 #
 # Exit status:
-#   0  the marketplace is registered and current
+#   0  the marketplace is registered and current, both confirmed
 #   1  the marketplace could not be registered
-#   2  the marketplace is registered, but its catalog may be stale
+#   2  neither could be established: `add` reported success but the listing
+#      that would confirm it could not be read, or an already-registered
+#      marketplace could not be updated and its catalog may be stale
 set -eu
 
 # --- Colors (disabled unless both streams are terminals) ---
@@ -66,7 +68,9 @@ fi
 
 info "Registering Punt Labs marketplace..."
 
-STALE=''
+# Empty means "ready". Otherwise it holds the rest of the closing banner's
+# first sentence, and is the reason this script exits 2.
+CAVEAT=''
 REGISTERED=''
 UNKNOWN=''
 
@@ -89,7 +93,7 @@ if [ -n "$REGISTERED" ]; then
   if [ "$UPDATE_RC" -eq 0 ]; then
     ok "marketplace updated"
   else
-    STALE=yes
+    CAVEAT='is registered, but the catalog may be stale.'
     warn "update failed (exit $UPDATE_RC); the local catalog may be stale"
     why "$UPDATE_OUT"
     warn "retry with: claude plugin marketplace update $MARKETPLACE_NAME"
@@ -98,9 +102,10 @@ elif claude plugin marketplace add "$MARKETPLACE_REPO" < /dev/null; then
   # `add` exiting 0 is a claim, not proof. Confirm the name is in the listing.
   VERIFY=$(claude plugin marketplace list < /dev/null 2>&1) && VERIFY_RC=0 || VERIFY_RC=$?
   if [ "$VERIFY_RC" -ne 0 ]; then
-    ok "marketplace registered"
-    warn "could not re-list to confirm it (exit $VERIFY_RC)"
+    CAVEAT='registration was reported, but could not be confirmed.'
+    warn "'add' reported success, but the confirming re-list failed (exit $VERIFY_RC)"
     why "$VERIFY"
+    warn "check by hand: claude plugin marketplace list"
   elif printf '%s\n' "$VERIFY" | listed "$MARKETPLACE_NAME"; then
     ok "marketplace registered"
   else
@@ -118,8 +123,8 @@ fi
 
 # --- Done ---
 
-if [ -n "$STALE" ]; then
-  printf '\n%b%bPunt Labs marketplace is registered, but the catalog may be stale.%b\n\n' "$YELLOW" "$BOLD" "$NC"
+if [ -n "$CAVEAT" ]; then
+  printf '\n%b%bPunt Labs marketplace %s%b\n\n' "$YELLOW" "$BOLD" "$CAVEAT" "$NC"
 else
   printf '\n%b%bPunt Labs marketplace is ready!%b\n\n' "$GREEN" "$BOLD" "$NC"
 fi
@@ -127,4 +132,4 @@ printf 'Install all tools and plugins:\n'
 printf '  See https://github.com/punt-labs for the install-all.sh command.\n'
 
 # A human has read the banner by now; 2 is how a script learns the same thing.
-[ -z "$STALE" ] || exit 2
+[ -z "$CAVEAT" ] || exit 2

@@ -43,9 +43,8 @@ update ran as `… 2>/dev/null || true`. The redirect destroyed the diagnostic
 and `|| true` destroyed the exit code, so a failed update (network down, auth
 failure, corrupt local clone, disk full) printed "Punt Labs marketplace is
 ready!" while leaving a stale catalog in place. The failure is now reported
-with the underlying error and a retry command, and the closing banner says the
-catalog may be stale. Exit stays `0`: the marketplace is registered and the
-user is not stuck.
+with the underlying error and a retry command, the closing banner says the
+catalog may be stale, and the script exits `2` (see below).
 
 **`install.sh` mistook a fork for this marketplace.** The registration check
 was `marketplace list | grep -q punt-labs`, unanchored against output that
@@ -71,11 +70,13 @@ truncated output rather than as an absence. Empty output is now named as such,
 and the exit status is reported alongside it, so "network down" and "corrupt
 local clone" are no longer indistinguishable.
 
-**The stale-catalog outcome was invisible to callers.** It printed a warning
-and exited `0`, so `install-all.sh`, a Dockerfile `RUN`, or any CI step saw
-success. That is the same class of signal — a printed line and nothing
-machine-readable — that this change exists to remove. It now exits `2`, and the
-script header documents all three statuses. Human-facing output is unchanged.
+**Outcomes the script could not confirm were reported as success.** Two paths
+printed a warning and exited `0`, so `install-all.sh`, a Dockerfile `RUN`, or
+any CI step saw success: a stale catalog after a failed update, and — worse — a
+registration whose confirming re-list failed, which printed `✓ marketplace
+registered` and "ready!" for something it had explicitly failed to establish.
+That asymmetry gave the *stronger* claim the *weaker* check. Both now exit `2`,
+each with its own banner, and the script header documents all three statuses.
 `warn` and `fail` also moved to stderr, so a redirected run no longer separates
 the label from its cause, and `fail` is red rather than sharing `warn`'s yellow.
 
@@ -94,12 +95,20 @@ picks up the fix was wrong for this data.
 
 Deleting the visible directory is not sufficient either. Git keeps a
 submodule's object store in the superproject under `.git/modules/<path>/`,
-which an `rm -rf` of the working copy does not touch — every file remains
-readable via `git --git-dir …/.git/modules/.punt-labs/ethos show HEAD:<file>`,
-verified against a real install. The README remediation removes the worktree,
-the object store, and the stale `[submodule]` config section, and ends with a
-`find` whose empty output is the success condition — necessary because `rm -rf`
-on a wrong path also prints nothing and exits `0`.
+which an `rm -rf` of the working copy does not touch — the whole history stays
+recoverable with `git clone "$M/.git/modules/.punt-labs/ethos" out`, confirmed
+against a real install. (`git --git-dir … show` is *not* the command to reach
+for once the worktree is gone: the module's `core.worktree` still points at the
+deleted directory, so it fails with `cannot chdir`, which reads misleadingly
+like the data being absent.)
+
+The README remediation removes the worktree, the object store, and the stale
+`[submodule]` config section, then verifies by testing those two paths for
+absence. It deliberately does not search for the string `punt-labs`: the
+marketplace directory is itself named `punt-labs`, so such a search matches the
+directory and everything under it and can never come back empty — a success
+condition that cannot be met is worse than none. The wrong-path case aborts
+rather than warning, since `rm -rf` on a nonexistent path is also silent.
 
 ### Removed
 
@@ -112,11 +121,22 @@ plugin in this checkout cannot reintroduce the leak.
 ### Added
 
 - **`leak-guard` CI job** (`.github/workflows/docs.yml`) — fails the build if a
-  submodule is tracked (`.gitmodules` or a mode-160000 gitlink), if any
-  plugin-generated state path is tracked, or if `CLAUDE.md` gains an
-  `@.punt-labs/…` import line whose target is gitignored. Until now the rule
-  existed only as prose, which is how a submodule shipped in the first place.
-  Every check runs before the job exits, so one build reports every violation.
+  submodule is tracked (`.gitmodules` or a mode-160000 gitlink), if any tracked
+  file is also matched by `.gitignore`, or if any `@`-import in `CLAUDE.md`
+  points somewhere that will not ship. Until now the rule existed only as
+  prose, which is how a submodule shipped in the first place. Every check runs
+  before the job exits, so one build reports every violation.
+
+  Both of the latter checks are derived rather than enumerated, because a
+  hand-maintained list is a second copy of a rule that drifts — the first
+  version's list had already fallen out of step with `.gitignore` before it
+  merged. Tracked-and-ignored is asked directly of git
+  (`git ls-files | git check-ignore --stdin --no-index`; `--no-index` is
+  load-bearing, since without it `check-ignore` declines to report tracked
+  paths at all and the check silently always passes). The import check tests
+  every `@`-import, not one hardcoded prefix, and distinguishes three ways a
+  target fails to ship: resolving outside the repository, being untracked, or
+  being gitignored.
 
   **This job must be added to the repository's required status checks.** If
   branch protection pins required checks by name, `leak-guard` passes

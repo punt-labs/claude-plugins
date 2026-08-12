@@ -56,25 +56,35 @@ files in it, so the update prints `warning: unable to rmdir '.punt-labs/ethos':
 Directory not empty`, exits `0`, and leaves the data on disk indefinitely.
 
 Deleting the visible directory is **not** enough on its own. Git keeps a
-submodule's object store in the superproject at `.git/modules/<path>/`, which
-survives an `rm -rf` of the working copy — the full history of every file
-remains readable via `git --git-dir …/.git/modules/.punt-labs/ethos show`. All
-three pieces have to go:
+submodule's object store in the superproject at `.git/modules/<path>/`, and an
+`rm -rf` of the working copy does not touch it. The whole history stays
+recoverable from there — `git clone "$M/.git/modules/.punt-labs/ethos" out`
+reconstructs every file. All three pieces have to go:
 
 ```bash
 M=~/.claude/plugins/marketplaces/punt-labs
-ls -d "$M" || echo "Not at this path — check: ls ~/.claude/plugins/marketplaces/"
-rm -rf "$M/.punt-labs" "$M/.git/modules/.punt-labs"
-git -C "$M" config --remove-section 'submodule..punt-labs/ethos' 2>/dev/null
-claude plugin marketplace update punt-labs
-find "$M" -path '*punt-labs*' -not -path "$M/.git/*"
+if [ ! -d "$M" ]; then
+  echo "Not at this path — check: ls ~/.claude/plugins/marketplaces/"
+else
+  rm -rf "$M/.punt-labs" "$M/.git/modules/.punt-labs"
+  git -C "$M" config --remove-section 'submodule..punt-labs/ethos' 2>/dev/null
+  claude plugin marketplace update punt-labs
+  for p in "$M/.punt-labs" "$M/.git/modules/.punt-labs"; do
+    [ -e "$p" ] && echo "STILL PRESENT: $p"
+  done
+  echo "checked — anything printed above is a leftover"
+fi
 ```
 
-The closing `find` printing nothing is the success condition. Check it — `rm -rf`
-on a path that does not exist prints nothing and exits `0`, so silence alone
-does not distinguish "cleared" from "wrong path". That is why the `ls -d` on the
-first line is there: if your marketplace is registered under a different name,
-it will tell you before you delete nothing and conclude you are done.
+The final loop is the verification, and it checks the two named paths by
+absence rather than searching for the string `punt-labs`: the marketplace
+directory is itself called `punt-labs`, so any such search matches the
+directory and everything under it and can never come back empty.
+
+Check the output rather than assuming. `rm -rf` on a path that does not exist
+prints nothing and exits `0`, so silence on its own does not distinguish
+"cleared" from "wrong path" — which is why the first line aborts instead of
+merely warning if the marketplace lives somewhere else.
 
 Nothing in it is secret and nothing in it is load-bearing for the marketplace —
 it is internal team metadata that should never have shipped.

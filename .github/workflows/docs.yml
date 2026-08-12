@@ -92,6 +92,42 @@ jobs:
           # --stdin` matches nothing, ever — a check that always passes. The
           # flag exists for exactly this question: why did a path become
           # tracked when the rules say it should be ignored?
+          #
+          # .gitignore is the ENTIRE input to this check, so it is asserted
+          # before its answer is trusted. `git check-ignore` reports "nothing
+          # is ignored" (exit 1) both when the rules match nothing and when
+          # there were no rules to read — indistinguishable outcomes. So
+          # deleting .gitignore, or deleting the single line covering a path,
+          # turns this FAIL into OK in the very commit that ships the leak.
+          # Reproduced with .claude/settings.json tracked: intact .gitignore
+          # gave "FAIL: these files are tracked ..."; `git rm .gitignore` gave
+          # "OK: no submodules, no plugin state ..." at rc=0 with the file
+          # still tracked. `chmod 000 .gitignore` did the same. The footer's
+          # "do not delete this check" is no defence when the check can be
+          # switched off from outside itself.
+          #
+          # The canary pins the invariant, not the file's shape. A line count
+          # or checksum passes on a .gitignore whose rules were all swapped for
+          # different ones; asking whether a known path is still ignored tests
+          # the property that actually matters.
+          if [ ! -f .gitignore ]; then
+            echo "FAIL: .gitignore is missing. Every rule the leak check applies"
+            echo "    lives there, so without it the check passes vacuously."
+            fail=1
+          elif [ ! -r .gitignore ]; then
+            echo "FAIL: .gitignore is not readable, so its rules could not be applied"
+            echo "    and the leak check would pass vacuously."
+            fail=1
+          fi
+          canary='.claude/settings.json'
+          if ! git check-ignore -q --no-index -- "$canary"; then
+            echo "FAIL: the canary path is no longer ignored: $canary"
+            echo "    .gitignore has lost that rule, or cannot be read. This check"
+            echo "    derives entirely from .gitignore, so a deleted rule disables"
+            echo "    it silently instead of loudly. Restore the rule rather than"
+            echo "    changing the canary."
+            fail=1
+          fi
           tracked=""
           if ! tracked=$(git ls-files); then
             echo "FAIL: \`git ls-files\` failed; the tracked set could not be read,"
@@ -125,11 +161,19 @@ jobs:
           # list marker, '@~/', './', and the .vox/.lux/.biff targets all
           # sailed past. The invariant CLAUDE.md actually states is that an
           # import must resolve to something that ships, so that is what is
-          # tested — every @-import, resolved, must be a tracked path. That
-          # covers each spelling and every future .gitignore entry at once.
+          # tested — every @-import naming a path must resolve to a tracked
+          # path. That covers each spelling and every future .gitignore entry
+          # at once.
+          #
+          # A false positive is more dangerous here than a false negative. A
+          # build that fails on a legitimate line teaches the next agent that
+          # this job is wrong, and the footer's "do not delete this check"
+          # stops being persuasive the moment the check is actually wrong.
+          # Four classes are therefore excluded by construction, below: fenced
+          # blocks, indented blocks, inline code spans, and prose @-mentions.
           #
           # Existence and readability are asserted separately: a missing or
-          # unreadable CLAUDE.md makes the grep vacuous, and the check would
+          # unreadable CLAUDE.md makes the scan vacuous, and the check would
           # otherwise report "no dangling imports" about a file it never read.
           if [ ! -f CLAUDE.md ]; then
             echo "FAIL: CLAUDE.md is missing, so the import check could not run."
@@ -139,14 +183,55 @@ jobs:
             echo "    A pass here would assert something about a file nobody read."
             fail=1
           else
+            # Every @-token on a live line is scanned, not just a line-leading
+            # one. Anchoring at the start of the line missed the documented
+            # inline form ("See @README for project overview"), and blockquote
+            # and ordered-list prefixes with it — the guard then affirmed "no
+            # dangling imports" about a file containing one.
+            #
+            # Three exclusions keep that width from misfiring, and this file
+            # needs all three today:
+            #   fenced blocks   — CLAUDE.md illustrates the clone failure in a
+            #                     ```text block.
+            #   indented blocks — same intent, 4-space spelling. Cheap here
+            #                     because CLAUDE.md has no indented lines at
+            #                     all, so nothing real can hide behind it.
+            #   inline code     — CLAUDE.md line 28 documents the import form
+            #                     as `@.punt-labs/<tool>/CLAUDE.md` in
+            #                     backticks. Scanning that as live would fail
+            #                     CI on the very paragraph explaining the rule.
+            #
+            # The @ must also sit at a line start or after whitespace. That is
+            # what separates an import from an address: `git@github.com:...` on
+            # line 17 and jim@punt-labs.com have a non-space before the @.
+            #
+            # awk owns this because fence and indent state depend on every
+            # preceding line, which a grep of matching lines cannot see.
             imports=""
-            if imports=$(grep -nE '^[[:space:]]*([-*+][[:space:]]+)?@[^[:space:]]' CLAUDE.md); then
-              grc=0
+            if imports=$(awk '
+              /^[[:space:]]*(```|~~~)/ { fence = !fence; blank = 0; indent = 0; next }
+              fence { next }
+              /^[[:space:]]*$/ { blank = 1; next }
+              /^(    |\t)/ { if (blank || indent) { indent = 1; next } }
+              { indent = 0; blank = 0 }
+              {
+                line = $0
+                gsub(/`[^`]*`/, " ", line)
+                while (match(line, /(^|[[:space:]])@[^[:space:]]+/)) {
+                  tok = substr(line, RSTART, RLENGTH)
+                  sub(/^[[:space:]]+/, "", tok)
+                  sub(/[].,;:!?)}>]+$/, "", tok)
+                  if (length(tok) > 1) { print NR ":" tok }
+                  line = substr(line, RSTART + RLENGTH)
+                }
+              }
+            ' CLAUDE.md); then
+              arc=0
             else
-              grc=$?
+              arc=$?
             fi
-            if [ "$grc" -gt 1 ]; then
-              echo "FAIL: reading CLAUDE.md failed (grep exited $grc), so the import"
+            if [ "$arc" -ne 0 ]; then
+              echo "FAIL: reading CLAUDE.md failed (awk exited $arc), so the import"
               echo "    check could not run."
               imports=""
               fail=1
@@ -154,14 +239,24 @@ jobs:
             bad=""
             while IFS= read -r entry; do
               [ -n "$entry" ] || continue
+              # awk emits one "<line>:@<token>" record per import, already
+              # trimmed of surrounding punctuation, so this is a strip rather
+              # than a parse.
               lineno=${entry%%:*}
-              text=${entry#*:}
-              target=$(printf '%s\n' "$text" \
-                | sed -E 's/^[[:space:]]*([-*+][[:space:]]+)?@//; s/[[:space:]].*$//')
-              # Import targets are paths. A bare '@handle' with no '/' or '.'
-              # is a mention in prose, not an import; skip it.
+              target=${entry#*:}
+              target=${target#@}
+              # Import targets are paths; prose @-mentions are not. Requiring
+              # path shape — a '/' anywhere, or a leading '.', '~' or '/' —
+              # admits every spelling a `<tool> enable` writes (all of them
+              # land under a dot-directory) while excluding '@handle',
+              # '@v1.2.3' and '@name.surname:', each of which would otherwise
+              # reach `git ls-files`, miss, and be reported as a dangling
+              # import. Known and accepted gap: a bare-filename import such as
+              # '@README.md' is not validated. Nothing generates one, and
+              # widening to catch it would readmit the version-string and
+              # dotted-handle false positives.
               case "$target" in
-                */*|*.*) ;;
+                */*|.*|'~'*|/*) ;;
                 *) continue ;;
               esac
               reason=""
