@@ -17,6 +17,52 @@
 .beads/
 .claude/agents/
 
+# Same leak, narrower paths — these sit beside files the repo legitimately
+# tracks, so they are named individually. Ignoring all of `.claude/` or all of
+# `.github/workflows/` would mask real content: `.github/workflows/docs.yml`
+# is this repo's only CI.
+#   settings.json  — written by `vox enable` and punt-kit init; registers hooks
+#                    by absolute path to one machine's plugin install, so it is
+#                    inert-to-broken on anyone else's disk.
+#   biff-notify.yml — written by `biff enable`; posts session events to the
+#                    team's NATS relay, and would run in every consumer's fork
+#                    against credentials they do not have.
+#
+# `.claude/hooks/` is deliberately NOT ignored. Every occupant observed across
+# the org — check-branch.sh, no-push-to-main.sh, make-check-gate.sh — is
+# portable governance shell, and koch-trainer-swift tracks its copies on
+# purpose. Ignoring the directory would silently block this repo from
+# committing a repo-authored validation hook, and silently is the operative
+# word: `git add` skips an ignored path without a word, so the author gets no
+# signal at all. The machine-specific occupant is settings.json, and that is
+# what is named.
+.claude/settings.json
+.github/workflows/biff-notify.yml
+
+# A submodule here does not leak data, it breaks the install: Claude Code
+# clones this repo with submodules, so an SSH submodule URL aborts the clone
+# for every user without a GitHub SSH key.
+#
+# `.gitmodules` is deliberately NOT ignored, and this comment exists so nobody
+# re-adds it. Ignoring it hid the file twice over: `git status` went quiet
+# locally, and CI could not see it either, because a checkout materialises only
+# tracked files. It also bought nothing — `git submodule add` stages
+# .gitmodules with --force regardless of any ignore rule (verified). Leaving it
+# visible restores the local signal at no cost, because the leak-guard job in
+# .github/workflows/docs.yml fails the build on both the file and the gitlink
+# (mode 160000).
+
+# The lux display process writes ImGui window geometry into its working
+# directory on exit. Per-machine screen state (pane sizes, docking layout) that
+# would follow a consumer's window manager around. Named exactly rather than
+# `*.ini`: an unanchored `*.ini` matches at any depth and would silently
+# swallow a future tox.ini, pytest.ini, or mypy.ini, and `git add` skips an
+# ignored path without a word. Every .ini observed across the org's repos is
+# one of these three shapes.
+imgui.ini
+Lux.ini
+Lux_*.ini
+
 # The mandated sibling lock every punt CLI takes before mutating a shared
 # host file (tool-enable-disable.md 2.4). Per-machine runtime state, and it
 # persists by design — unlinking a lock file races the next writer. The
