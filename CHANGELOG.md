@@ -96,6 +96,18 @@ might simply be newer than this script, so that path hedges and exits `2`.
 `warn` and `fail` also moved to stderr, so a redirected run no longer separates
 the label from its cause, and `fail` is red rather than sharing `warn`'s yellow.
 
+**`awk` is now a checked prerequisite, and checked by use rather than by
+presence.** The registration check is written in awk, which this change
+introduced — the previous `grep` had no such dependency. A missing `awk` did
+not fail cleanly: the pipeline failed, no marketplace matched, and the script
+took the not-registered path, so a user with a working install was told their
+registration could not be confirmed while the only true clue came from the
+shell rather than from us. A *nonconforming* `awk` failed identically — mawk
+1.3.3, the default on Debian and Ubuntu through 16.04, rejects
+`[[:alnum:]]` outright — so `command -v awk` alone would have waved through the
+same silent wrong answer. The prerequisite block now runs the real matcher
+against a known-good fixture and fails with a message naming what to install.
+
 **`curl … | sh` could not fail.** The documented Quick Start piped the download
 straight into a shell. With `curl -f`, an HTTP error prints nothing to stdout,
 `sh` reads empty input, and the pipeline exits `0` — a 404 from a force-pushed

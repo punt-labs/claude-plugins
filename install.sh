@@ -9,7 +9,7 @@
 #
 # Exit status:
 #   0  the marketplace is registered and current, both confirmed
-#   1  the marketplace is not registered and could not be registered
+#   1  this script could not register the marketplace
 #   2  the state could not be established. Three ways in: `add` reported
 #      success but the listing that would confirm it could not be read;
 #      `add` failed while the listing left it unknown whether the
@@ -64,6 +64,19 @@ if command -v git >/dev/null 2>&1; then
   ok "git found"
 else
   fail "'git' not found. Install git first: https://git-scm.com/downloads"
+fi
+
+# listed() is written in awk, and an awk that cannot run it reports every
+# marketplace as absent — indistinguishable from one that really is. mawk
+# 1.3.3, the default awk on older Debian and Ubuntu, has no [[:alnum:]] and
+# fails exactly that way. Presence is not enough; ask listed() a question
+# whose answer is known.
+if ! command -v awk >/dev/null 2>&1; then
+  fail "'awk' not found. It reads the marketplace listing; install gawk, mawk, or busybox awk"
+elif printf '  ❯ %s\n' "$MARKETPLACE_NAME" | listed "$MARKETPLACE_NAME"; then
+  ok "awk found"
+else
+  fail "'awk' cannot parse a marketplace listing (needs POSIX character classes); install gawk, mawk 1.3.4 or newer, or busybox awk"
 fi
 
 # --- Step 2: Register marketplace ---
