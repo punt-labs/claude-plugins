@@ -10,7 +10,9 @@ There is no such thing as a "pre-existing" issue. If you see a problem — in co
 
 **This repo is cloned onto every user's machine.** `claude plugin marketplace add punt-labs/claude-plugins` clones it into `~/.claude/plugins/marketplaces/punt-labs/` — and it clones **with submodules**. Everything tracked here is published to every consumer of the marketplace.
 
-Two consequences override the org-wide conventions in `../CLAUDE.md`:
+Two consequences override the org-wide Punt Labs conventions (which load from
+the workspace meta-repo when this repo is checked out as a sibling inside it,
+and are simply absent when it is cloned as a marketplace):
 
 **1. No git submodules. Ever.** The org rule "every project adds `punt-labs/team` as a submodule at `.punt-labs/ethos/`" does **not** apply here. It was added to this repo and broke the marketplace install: `.gitmodules` used the SSH URL `git@github.com:punt-labs/team.git`, so any user without a GitHub SSH key hit
 
