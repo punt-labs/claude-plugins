@@ -33,8 +33,9 @@ from the global `~/.punt-labs/ethos/identities/`.
 **The pinned installer URL served a stale script.** `README.md` pinned the
 `curl` one-liner to commit `d7679bd`, but `install.sh` changed afterward in
 `2a7e501`, so the advertised installer still printed the `main`-pinned example
-URLs that commit removed. Both URLs now pin to `2a7e501`, which is on `main`
-and carries the current script.
+URLs that commit removed. The pin moved to `2a7e501` at the time; it has since
+moved again to `aa5a34d`, per the entry above, because the installer rewrite in
+this same release superseded it.
 
 **README described `install.sh` behavior it never had.** It claimed the script
 fetches the catalog, lists plugins, and prints a sha256 checksum. It does none
