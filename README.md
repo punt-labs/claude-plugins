@@ -5,19 +5,22 @@ Plugin marketplace for [Punt Labs](https://github.com/punt-labs) projects.
 ## Quick Start
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/2a7e501/install.sh -o install.sh
-sh install.sh
+curl -fsSL --remove-on-error https://raw.githubusercontent.com/punt-labs/claude-plugins/2a7e501/install.sh -o install.sh && sh install.sh
 ```
 
 The URL is pinned to a specific commit. The script checks that `claude` and
 `git` are installed, then registers this marketplace with Claude Code.
 
-Download and run as two steps rather than `curl … | sh`. Piped straight into a
-shell, a failed download is indistinguishable from a successful one: `curl -f`
-prints nothing to stdout on an HTTP error, `sh` reads the empty input, and the
-pipeline exits `0`. You would be told nothing had gone wrong. Downloading first
-means a 404 — from a force-pushed history, a deleted repo, or a captive-portal
-proxy — fails loudly before anything executes.
+Download and run as two `&&`-joined steps rather than `curl … | sh`. Piped
+straight into a shell, a failed download is indistinguishable from a successful
+one: `curl -f` prints nothing to stdout on an HTTP error, `sh` reads the empty
+input, and the pipeline exits `0` — you would be told nothing had gone wrong.
+
+Each part earns its place. The `&&` is load-bearing: without it, a failed
+download still runs whatever `install.sh` happens to be sitting in the current
+directory, which may be an older, differently-pinned copy. `--remove-on-error`
+stops curl leaving a truncated or empty file behind, since `sh` on an empty file
+also exits `0` in silence.
 
 <details>
 <summary>Manual setup (no curl)</summary>
@@ -52,12 +55,26 @@ Updating does **not** remove it. Git cannot delete a directory that still has
 files in it, so the update prints `warning: unable to rmdir '.punt-labs/ethos':
 Directory not empty`, exits `0`, and leaves the data on disk indefinitely.
 
-To clear it:
+Deleting the visible directory is **not** enough on its own. Git keeps a
+submodule's object store in the superproject at `.git/modules/<path>/`, which
+survives an `rm -rf` of the working copy — the full history of every file
+remains readable via `git --git-dir …/.git/modules/.punt-labs/ethos show`. All
+three pieces have to go:
 
 ```bash
-rm -rf ~/.claude/plugins/marketplaces/punt-labs/.punt-labs
+M=~/.claude/plugins/marketplaces/punt-labs
+ls -d "$M" || echo "Not at this path — check: ls ~/.claude/plugins/marketplaces/"
+rm -rf "$M/.punt-labs" "$M/.git/modules/.punt-labs"
+git -C "$M" config --remove-section 'submodule..punt-labs/ethos' 2>/dev/null
 claude plugin marketplace update punt-labs
+find "$M" -path '*punt-labs*' -not -path "$M/.git/*"
 ```
+
+The closing `find` printing nothing is the success condition. Check it — `rm -rf`
+on a path that does not exist prints nothing and exits `0`, so silence alone
+does not distinguish "cleared" from "wrong path". That is why the `ls -d` on the
+first line is there: if your marketplace is registered under a different name,
+it will tell you before you delete nothing and conclude you are done.
 
 Nothing in it is secret and nothing in it is load-bearing for the marketplace —
 it is internal team metadata that should never have shipped.

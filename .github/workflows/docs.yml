@@ -29,10 +29,28 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: No submodules, no plugin state, no dangling imports
         run: |
-          # No `set -e`: every check runs and every violation is reported in
-          # one build, so a future agent sees the whole set rather than
-          # fixing them one red build at a time.
-          set -uo pipefail
+          # errexit is NOT optional here and omitting it buys nothing: the
+          # runner invokes `run:` blocks as `bash -e {0}`, so -e is already on
+          # before the first line of this script. It is declared explicitly so
+          # that executing this block locally reproduces CI exactly instead of
+          # passing under a more forgiving shell.
+          #
+          # Reporting every violation in one build therefore does NOT come
+          # from leaving -e off. It comes from accumulating into $fail and
+          # exiting once at the end, which requires every individual check to
+          # be non-fatal. Any command whose failure is an expected outcome
+          # must be neutralised with `|| true`, or errexit kills the step
+          # before a single FAIL block prints. grep is the trap: it exits 1
+          # when it finds nothing, and finding nothing is the state we want.
+          # `git ls-files` and `awk` exit 0 on zero matches, so they need no
+          # guard.
+          #
+          # `|| true` is banned in this script for anything that can also fail
+          # for a real reason. It cannot tell "found nothing" from "could not
+          # look", and a check that cannot tell those apart reports OK about a
+          # file it never read. Branch on the exit status instead: grep 0=found
+          # 1=clean 2=unreadable; git check-ignore 0=match 1=no-match 128=error.
+          set -euo pipefail
           fail=0
 
           # (a) Submodules do not merely leak, they break the install: the
@@ -47,7 +65,13 @@ jobs:
             echo "    from the global ~/.punt-labs/ethos/ instead."
             fail=1
           fi
-          gitlinks=$(git ls-files -s | awk '$1 == "160000"' | cut -f2-)
+          index=""
+          if ! index=$(git ls-files -s); then
+            echo "FAIL: \`git ls-files -s\` failed; the index could not be read,"
+            echo "    so the submodule check could not run."
+            fail=1
+          fi
+          gitlinks=$(printf '%s\n' "$index" | awk '$1 == "160000"' | cut -f2-)
           if [ -n "$gitlinks" ]; then
             echo "FAIL: submodule gitlink(s) tracked in the index:"
             echo "$gitlinks" | sed 's/^/      /'
@@ -55,38 +79,116 @@ jobs:
             fail=1
           fi
 
-          # (b) Per-repo state deposited by vox, lux, biff, ethos, quarry,
-          # beads, and punt-kit init. Local tooling state, not marketplace
-          # content — tracking it publishes internal rosters, relay URLs, and
-          # one machine's absolute plugin paths to strangers.
-          leaked=$(git ls-files -- \
-            '.biff' '.vox' '.lux' '.beads' '.punt-labs' \
-            '.claude/settings.json' '.claude/hooks' '.claude/agents' \
-            '*.ini')
-          if [ -n "$leaked" ]; then
-            echo "FAIL: plugin-generated state is tracked:"
-            echo "$leaked" | sed 's/^/      /'
-            echo "    These are local tooling state, not catalog content. Untrack with"
-            echo "    \`git rm --cached <path>\`; the paths are already in .gitignore."
+          # (b) Anything both tracked and ignored. Derived from .gitignore, not
+          # a second copy of it: an earlier version listed the paths by hand
+          # here, and the two lists shipped out of sync on their first outing —
+          # .github/workflows/biff-notify.yml was in .gitignore and missing
+          # from the list, so it was tracked and reported OK. Asking git the
+          # question directly cannot drift, and it picks up every future
+          # .gitignore entry for free.
+          #
+          # --no-index is load-bearing. Without it `git check-ignore` refuses
+          # to report tracked paths at all, so `git ls-files | git check-ignore
+          # --stdin` matches nothing, ever — a check that always passes. The
+          # flag exists for exactly this question: why did a path become
+          # tracked when the rules say it should be ignored?
+          tracked=""
+          if ! tracked=$(git ls-files); then
+            echo "FAIL: \`git ls-files\` failed; the tracked set could not be read,"
+            echo "    so the plugin-state check could not run."
             fail=1
+          fi
+          if [ -n "$tracked" ]; then
+            if leaked=$(printf '%s\n' "$tracked" | git check-ignore --stdin --no-index); then
+              echo "FAIL: these files are tracked even though .gitignore excludes them:"
+              printf '%s\n' "$leaked" | sed 's/^/      /'
+              echo "    Local tooling state, not catalog content. Untrack with"
+              echo "    \`git rm --cached <path>\`."
+              fail=1
+            else
+              rc=$?
+              if [ "$rc" -ne 1 ]; then
+                echo "FAIL: \`git check-ignore\` exited $rc (expected 0 or 1);"
+                echo "    the plugin-state check could not run."
+                fail=1
+              fi
+            fi
           fi
 
           # (c) `<tool> enable` appends an @-import line to the tracked
-          # CLAUDE.md pointing into .punt-labs/, which is gitignored. The
-          # import would ship while its target never does, leaving every
-          # consumer with a CLAUDE.md referencing a path that does not exist.
-          # Asserted, not assumed: a missing CLAUDE.md would make the grep
-          # below vacuous and this check would pass while enforcing nothing.
+          # CLAUDE.md whose target is gitignored. The import ships, the target
+          # never does, and every consumer gets a CLAUDE.md pointing at a path
+          # that is not there.
+          #
+          # The rule is derived, not spelled. Matching a literal '^@\.punt-labs'
+          # enforced one spelling out of seven: a leading space, a markdown
+          # list marker, '@~/', './', and the .vox/.lux/.biff targets all
+          # sailed past. The invariant CLAUDE.md actually states is that an
+          # import must resolve to something that ships, so that is what is
+          # tested — every @-import, resolved, must be a tracked path. That
+          # covers each spelling and every future .gitignore entry at once.
+          #
+          # Existence and readability are asserted separately: a missing or
+          # unreadable CLAUDE.md makes the grep vacuous, and the check would
+          # otherwise report "no dangling imports" about a file it never read.
           if [ ! -f CLAUDE.md ]; then
-            echo "FAIL: CLAUDE.md is missing, so the import check cannot run."
+            echo "FAIL: CLAUDE.md is missing, so the import check could not run."
             fail=1
-          fi
-          imports=$(grep -n '^@\.punt-labs' CLAUDE.md 2>/dev/null)
-          if [ -n "$imports" ]; then
-            echo "FAIL: CLAUDE.md has plugin import line(s) whose target is gitignored:"
-            echo "$imports" | sed 's/^/      /'
-            echo "    Delete the line. Do not un-ignore .punt-labs/ to satisfy it."
+          elif [ ! -r CLAUDE.md ]; then
+            echo "FAIL: CLAUDE.md is not readable, so the import check could not run."
+            echo "    A pass here would assert something about a file nobody read."
             fail=1
+          else
+            imports=""
+            if imports=$(grep -nE '^[[:space:]]*([-*+][[:space:]]+)?@[^[:space:]]' CLAUDE.md); then
+              grc=0
+            else
+              grc=$?
+            fi
+            if [ "$grc" -gt 1 ]; then
+              echo "FAIL: reading CLAUDE.md failed (grep exited $grc), so the import"
+              echo "    check could not run."
+              imports=""
+              fail=1
+            fi
+            bad=""
+            while IFS= read -r entry; do
+              [ -n "$entry" ] || continue
+              lineno=${entry%%:*}
+              text=${entry#*:}
+              target=$(printf '%s\n' "$text" \
+                | sed -E 's/^[[:space:]]*([-*+][[:space:]]+)?@//; s/[[:space:]].*$//')
+              # Import targets are paths. A bare '@handle' with no '/' or '.'
+              # is a mention in prose, not an import; skip it.
+              case "$target" in
+                */*|*.*) ;;
+                *) continue ;;
+              esac
+              reason=""
+              case "$target" in
+                '~'*|/*|../*|*/../*)
+                  reason="resolves outside the repository, so it can never ship" ;;
+                *)
+                  if git ls-files --error-unmatch -- "$target" >/dev/null 2>&1; then
+                    : # tracked, so it ships and the import resolves
+                  elif git check-ignore -q --no-index -- "$target"; then
+                    reason="target is gitignored, so it never ships"
+                  else
+                    reason="target is not tracked, so it never ships"
+                  fi ;;
+              esac
+              if [ -n "$reason" ]; then
+                bad="${bad}      line ${lineno}: @${target}"$'\n'
+                bad="${bad}          ${reason}"$'\n'
+              fi
+            done <<< "$imports"
+            if [ -n "$bad" ]; then
+              echo "FAIL: CLAUDE.md @-import(s) point at paths that never ship:"
+              printf '%s' "$bad"
+              echo "    Every @-import must resolve to a path tracked in this repo."
+              echo "    Delete the line; do not un-ignore the target to satisfy it."
+              fail=1
+            fi
           fi
 
           if [ "$fail" -ne 0 ]; then

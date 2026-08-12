@@ -6,19 +6,42 @@
 # stale the moment this file changed — which is precisely the bug that shipped
 # once already (README pinned a SHA predating the fix it was meant to deliver).
 # One pinned URL, in one place.
+#
+# Exit status:
+#   0  the marketplace is registered and current
+#   1  the marketplace could not be registered
+#   2  the marketplace is registered, but its catalog may be stale
 set -eu
 
-# --- Colors (disabled when not a terminal) ---
-if [ -t 1 ]; then
-  BOLD='\033[1m' GREEN='\033[32m' YELLOW='\033[33m' NC='\033[0m'
+# --- Colors (disabled unless both streams are terminals) ---
+if [ -t 1 ] && [ -t 2 ]; then
+  BOLD='\033[1m' GREEN='\033[32m' YELLOW='\033[33m' RED='\033[31m' NC='\033[0m'
 else
-  BOLD='' GREEN='' YELLOW='' NC=''
+  BOLD='' GREEN='' YELLOW='' RED='' NC=''
 fi
 
 info() { printf '%b▶%b %s\n' "$BOLD" "$NC" "$1"; }
 ok()   { printf '  %b✓%b %s\n' "$GREEN" "$NC" "$1"; }
-warn() { printf '  %b!%b %s\n' "$YELLOW" "$NC" "$1"; }
-fail() { printf '  %b✗%b %s\n' "$YELLOW" "$NC" "$1"; exit 1; }
+warn() { printf '  %b!%b %s\n' "$YELLOW" "$NC" "$1" >&2; }
+fail() { printf '  %b✗%b %s\n' "$RED" "$NC" "$1" >&2; exit 1; }
+
+# Print a failed command's output, or a placeholder when it printed none —
+# a bare newline reads as truncated output rather than as silence.
+why() {
+  if [ -n "$1" ]; then
+    printf '%s\n' "$1" >&2
+  else
+    printf '    (the command printed nothing)\n' >&2
+  fi
+}
+
+# Exit 0 if the marketplace listing on stdin names $1. A name is its own line,
+# decorated: "  ❯ punt-labs". Strip the decoration and compare the first field,
+# so a fork registered under another name is not matched by its
+# "Source: ... (punt-labs/claude-plugins)" line.
+listed() {
+  awk -v name="$1" '{ sub(/^[^[:alnum:]]+/, "") } $1 == name { found = 1 } END { exit !found }'
+}
 
 MARKETPLACE_REPO="punt-labs/claude-plugins"
 MARKETPLACE_NAME="punt-labs"
@@ -45,35 +68,52 @@ info "Registering Punt Labs marketplace..."
 
 STALE=''
 REGISTERED=''
+UNKNOWN=''
 
-# A marketplace name is its own line, decorated: "  ❯ punt-labs". Strip the
-# decoration and compare the first field, so a fork registered under another
-# name is not matched by the "Source: ... (punt-labs/claude-plugins)" line.
-if LISTING=$(claude plugin marketplace list < /dev/null 2>&1); then
-  if printf '%s\n' "$LISTING" |
-     awk -v name="$MARKETPLACE_NAME" \
-         '{ sub(/^[^[:alnum:]]+/, "") } $1 == name { found = 1 } END { exit !found }'
-  then
+LISTING=$(claude plugin marketplace list < /dev/null 2>&1) && LIST_RC=0 || LIST_RC=$?
+
+if [ "$LIST_RC" -eq 0 ]; then
+  if printf '%s\n' "$LISTING" | listed "$MARKETPLACE_NAME"; then
     REGISTERED=yes
   fi
 else
-  warn "could not list marketplaces; assuming '$MARKETPLACE_NAME' is not registered"
-  printf '%s\n' "$LISTING" >&2
+  UNKNOWN=yes
+  warn "could not list marketplaces (exit $LIST_RC); trying to register '$MARKETPLACE_NAME' anyway"
+  why "$LISTING"
 fi
 
 if [ -n "$REGISTERED" ]; then
   ok "marketplace already registered"
-  if UPDATE_OUT=$(claude plugin marketplace update "$MARKETPLACE_NAME" < /dev/null 2>&1); then
+  UPDATE_OUT=$(claude plugin marketplace update "$MARKETPLACE_NAME" < /dev/null 2>&1) &&
+    UPDATE_RC=0 || UPDATE_RC=$?
+  if [ "$UPDATE_RC" -eq 0 ]; then
     ok "marketplace updated"
   else
     STALE=yes
-    warn "update failed; the local catalog may be stale"
-    printf '%s\n' "$UPDATE_OUT" >&2
+    warn "update failed (exit $UPDATE_RC); the local catalog may be stale"
+    why "$UPDATE_OUT"
     warn "retry with: claude plugin marketplace update $MARKETPLACE_NAME"
   fi
+elif claude plugin marketplace add "$MARKETPLACE_REPO" < /dev/null; then
+  # `add` exiting 0 is a claim, not proof. Confirm the name is in the listing.
+  VERIFY=$(claude plugin marketplace list < /dev/null 2>&1) && VERIFY_RC=0 || VERIFY_RC=$?
+  if [ "$VERIFY_RC" -ne 0 ]; then
+    ok "marketplace registered"
+    warn "could not re-list to confirm it (exit $VERIFY_RC)"
+    why "$VERIFY"
+  elif printf '%s\n' "$VERIFY" | listed "$MARKETPLACE_NAME"; then
+    ok "marketplace registered"
+  else
+    why "$VERIFY"
+    fail "'claude plugin marketplace add' reported success, but '$MARKETPLACE_NAME' is not in the listing above"
+  fi
+elif [ -n "$UNKNOWN" ]; then
+  # The listing failed, so a rejected add may only mean it was already there.
+  # Report what we know instead of guessing from the error text above.
+  warn "could not determine whether '$MARKETPLACE_NAME' was already registered"
+  fail "and registering '$MARKETPLACE_REPO' failed too (error above). Check by hand: claude plugin marketplace list"
 else
-  claude plugin marketplace add "$MARKETPLACE_REPO" < /dev/null || fail "Failed to register marketplace '$MARKETPLACE_REPO'"
-  ok "marketplace registered"
+  fail "Failed to register marketplace '$MARKETPLACE_REPO'"
 fi
 
 # --- Done ---
@@ -85,3 +125,6 @@ else
 fi
 printf 'Install all tools and plugins:\n'
 printf '  See https://github.com/punt-labs for the install-all.sh command.\n'
+
+# A human has read the banner by now; 2 is how a script learns the same thing.
+[ -z "$STALE" ] || exit 2

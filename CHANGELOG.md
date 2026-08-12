@@ -57,6 +57,28 @@ still declared success. The check now strips the `❯` decoration and compares
 the whole first field to the marketplace name. A failing `list` is reported
 rather than hidden.
 
+**`install.sh` took `add`'s word for it.** A successful exit from
+`claude plugin marketplace add` was treated as proof of registration, from a
+CLI the script otherwise does not trust enough to parse. It now re-lists and
+re-checks afterwards, and fails loudly if the marketplace is absent despite the
+success exit. This also downgrades any future brittleness in the name detector
+from a silent stale catalog to a diagnosable complaint.
+
+**A failed command with no output produced a blank "reason".** Both new error
+reports printed the captured output unconditionally, so a command that failed
+silently yielded a bare newline where the cause should be — which reads as
+truncated output rather than as an absence. Empty output is now named as such,
+and the exit status is reported alongside it, so "network down" and "corrupt
+local clone" are no longer indistinguishable.
+
+**The stale-catalog outcome was invisible to callers.** It printed a warning
+and exited `0`, so `install-all.sh`, a Dockerfile `RUN`, or any CI step saw
+success. That is the same class of signal — a printed line and nothing
+machine-readable — that this change exists to remove. It now exits `2`, and the
+script header documents all three statuses. Human-facing output is unchanged.
+`warn` and `fail` also moved to stderr, so a redirected run no longer separates
+the label from its cause, and `fail` is red rather than sharing `warn`'s yellow.
+
 **`curl … | sh` could not fail.** The documented Quick Start piped the download
 straight into a shell. With `curl -f`, an HTTP error prints nothing to stdout,
 `sh` reads empty input, and the pipeline exits `0` — a 404 from a force-pushed
@@ -68,8 +90,16 @@ upstream does not remove it from a consumer's working tree: git cannot delete a
 non-empty directory, so `marketplace update` prints `warning: unable to rmdir
 '.punt-labs/ethos': Directory not empty`, exits `0`, and leaves ~1 MB of team
 registry on disk indefinitely. The previous release's note claiming an update
-picks up the fix was wrong for this data. README now carries the `rm -rf` +
-update remediation.
+picks up the fix was wrong for this data.
+
+Deleting the visible directory is not sufficient either. Git keeps a
+submodule's object store in the superproject under `.git/modules/<path>/`,
+which an `rm -rf` of the working copy does not touch — every file remains
+readable via `git --git-dir …/.git/modules/.punt-labs/ethos show HEAD:<file>`,
+verified against a real install. The README remediation removes the worktree,
+the object store, and the stale `[submodule]` config section, and ends with a
+`find` whose empty output is the success condition — necessary because `rm -rf`
+on a wrong path also prints nothing and exits `0`.
 
 ### Removed
 
@@ -91,12 +121,20 @@ plugin in this checkout cannot reintroduce the leak.
   **This job must be added to the repository's required status checks.** If
   branch protection pins required checks by name, `leak-guard` passes
   unenforced until it is listed.
-- Ignore coverage for `.claude/settings.json`, `.claude/hooks/`,
-  `.github/workflows/biff-notify.yml`, `.gitmodules`, and `*.ini` — paths the
-  punt-labs plugins write on enable, every one of which is committed in sibling
-  repos today and none of which were ignored here. Note the `.gitmodules` entry
-  is a backstop only: `git submodule add` force-stages it regardless of
-  `.gitignore`, so `leak-guard` is the actual enforcement.
+- Ignore coverage for `.claude/settings.json`,
+  `.github/workflows/biff-notify.yml`, and the three lux window-state files
+  (`imgui.ini`, `Lux.ini`, `Lux_*.ini`) — paths the punt-labs plugins write on
+  enable, committed in sibling repos today and none of them ignored here.
+
+  Two candidates were deliberately left un-ignored, with the reasoning recorded
+  in `.gitignore` so nobody adds them back. `.gitmodules` stays visible: an
+  ignore hid it twice over — silent in `git status` locally, and invisible to
+  CI, since a checkout materialises only tracked files — while buying nothing,
+  because `git submodule add` force-stages it regardless. `.claude/hooks/`
+  stays visible because every occupant across the org is portable governance
+  shell that a repo may legitimately want to track, and ignoring a path makes
+  `git add` skip it without a word. The lux entry is three exact filenames
+  rather than `*.ini`, which would silently swallow a future `tox.ini`.
 - `Why This Repo Is Different` section in `CLAUDE.md` recording why the
   org-wide ethos-submodule mandate does not apply to a repo that gets cloned
   onto every user's machine, and why running any `<tool> enable` here is
