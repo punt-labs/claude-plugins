@@ -1,21 +1,175 @@
+# === Punt Labs canonical .gitignore ===
+# Source of truth: .bin/gitignore-canonical.template
+# Rollout:         .bin/gitignore-canonical-rollout.sh
+# Repo-specific additions belong BELOW the "# === Repo-specific ===" marker.
+# Everything above it is managed by the rollout script.
+
+# --- Secrets & local overrides ---
+.env
+.env.*
+.env*.local
+!.env.example
+.envrc.local
+.biff.local
+.claude/settings.local.json
+.claude/settings.local.*
+.claude/mcp.local.json
+.mcp.local.json
 *.local
 *.local.*
+.*.local
+.*.local.*
 
-# Scratch directory (TMPDIR set via .envrc)
+# --- Punt Labs runtime state (never commit) ---
+.punt-labs/local/
+.punt-labs/**/local/**
+.punt-labs/**/*.local.*
+.punt-labs/quarry/captures/
+.punt-labs/vox/ephemeral/
+.punt-labs/vox/vox.local.md
+.punt-labs/lux.md
+
+# --- Claude Code runtime state ---
+.claude/*
+!.claude/settings.json
+!.claude/commands/
+!.claude/hooks/
+!.claude/agents/
+!.claude/rules/
+!.claude/skills/
+.claude/scheduled_tasks*
+.claude/worktrees/
+.claude/projects/
+.claude/beadle.poll.t
+*/**/.claude/
+
+# --- Lock files (except uv.lock) ---
+.*.lock
+*.punt-import.lock
+.CLAUDE.md.lock
+.CLAUDE.md.punt-import.lock
+**/.create.lock
+
+# --- Beads runtime state ---
+.beads/bd.sock*
+.beads/beads.db*
+.beads/daemon-*
+.beads/daemon.log
+.beads/daemon-error
+.beads/.local_version
+
+# --- Scratch / temp ---
 .tmp/*
 !.tmp/.gitkeep
+*.tmp
+CLAUDE.md.tmp
+
+# --- Worktrees ---
+.worktrees/
+
+# --- OS junk ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashe
+Thumbs.db
+ehthumbs.db
+
+# --- Editors / IDEs ---
+.idea/
+.vscode/
+.cursor/
+.codex/
+.accio/
+.claude-flow/
+*.swp
+*.swo
+*~
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+dist/
+build/
+*.egg
+*.egg-info/
+.eggs/
+.mypy_cache/
+.pyright/
+.pytest_cache/
+.pytest-work/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+uv.toml
+
+# --- Node / web ---
+node_modules/
+.astro/
+.vercel/
+
+# --- Go ---
+coverage.out
+*.test
+
+# --- Swift / Xcode ---
+# (Do NOT ignore *.xcodeproj / *.xcworkspace — those directories are tracked;
+# only ignore user-specific state INSIDE them.)
+xcuserdata/
+DerivedData/
+CoverageDerived/
+*.xccheckout
+*.xcresult
+*.xcscmblueprint
+*.hmap
+*.dSYM
+*.dSYM.zip
+*.ipa
+.swiftpm/
+Package.pin
+Package.resolved
+Carthage/Build/
+Carthage/Checkout
+Pods/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+iOSInjectionProject/
+playground.xcworkspace
+timeline.xctimeline
+
+# --- LaTeX build artifacts ---
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fl
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# === Repo-specific ===
+
+# Scratch directory (TMPDIR set via .envrc)
 
 # Plugin-generated per-repo state. Claude Code clones this repo onto every
 # user's machine when they run `claude plugin marketplace add`, so anything
 # tracked here ships to all consumers. A submodule tracked here is worse than
 # leakage — it breaks the install outright (see CLAUDE.md, "Why This Repo Is
 # Different"). Keep these on disk for local tooling; never commit them.
-.punt-labs/
 .vox/
 .lux/
 .biff
 .beads/
-.claude/agents/
 
 # Same leak, narrower paths — these sit beside files the repo legitimately
 # tracks, so they are named individually. Ignoring all of `.claude/` or all of
@@ -36,7 +190,6 @@
 # word: `git add` skips an ignored path without a word, so the author gets no
 # signal at all. The machine-specific occupant is settings.json, and that is
 # what is named.
-.claude/settings.json
 .github/workflows/biff-notify.yml
 
 # A submodule here does not leak data, it breaks the install: Claude Code
