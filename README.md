@@ -5,7 +5,7 @@ Plugin marketplace for [Punt Labs](https://github.com/punt-labs) projects.
 ## Quick Start
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/2a7e501/install.sh -o install.sh && [ -s install.sh ] && sh install.sh
+curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/2406e4b/install.sh -o install.sh && [ -s install.sh ] && sh install.sh
 ```
 
 The URL is pinned to a specific commit. The script checks that `claude`, `git`
@@ -33,7 +33,7 @@ test beats a flag the target audience may not have.
 <summary>Manual setup (no curl)</summary>
 
 ```bash
-claude plugin marketplace add punt-labs/claude-plugins
+claude plugin marketplace add https://github.com/punt-labs/claude-plugins.git
 ```
 
 </details>
@@ -42,7 +42,7 @@ claude plugin marketplace add punt-labs/claude-plugins
 <summary>Inspect before running</summary>
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/2a7e501/install.sh -o install.sh && [ -s install.sh ] && cat install.sh
+curl -fsSL https://raw.githubusercontent.com/punt-labs/claude-plugins/2406e4b/install.sh -o install.sh && [ -s install.sh ] && cat install.sh
 ```
 
 Read it, then run it as a separate, deliberate step:
