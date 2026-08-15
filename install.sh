@@ -50,10 +50,9 @@ listed() {
 # Register by explicit HTTPS URL, not the "owner/repo" shorthand. The shorthand's
 # clone transport is resolved by the CLI and has varied by version; an https://
 # URL pins it to HTTPS, which clones a public repo with no SSH key and no GitHub
-# authentication. MARKETPLACE_REPO stays for human-readable messages; the
-# marketplace's registered name still comes from marketplace.json, so the
-# name-matching in listed() is unaffected by which form we add.
-MARKETPLACE_REPO="punt-labs/claude-plugins"
+# authentication. The marketplace's registered name still comes from
+# marketplace.json, so the name-matching in listed() is unaffected by which form
+# we add — MARKETPLACE_NAME, not the source string, drives every list/update.
 MARKETPLACE_GIT="https://github.com/punt-labs/claude-plugins.git"
 MARKETPLACE_NAME="punt-labs"
 
@@ -142,7 +141,7 @@ elif [ -n "$UNKNOWN" ] || [ -n "$LISTING" ]; then
   # A rejected `add` may only mean it was already there. Two ways to be unsure:
   # the listing could not be read, or it was read and named nothing we know —
   # which is also how a listing format newer than listed() looks.
-  warn "registering '$MARKETPLACE_REPO' failed (error above)"
+  warn "registering '$MARKETPLACE_NAME' from '$MARKETPLACE_GIT' failed (error above)"
   if [ -n "$UNKNOWN" ]; then
     warn "and whether '$MARKETPLACE_NAME' was already registered could not be determined"
   else
@@ -152,7 +151,7 @@ elif [ -n "$UNKNOWN" ] || [ -n "$LISTING" ]; then
   CAVEAT='could not be added; if it is already registered, this script could not tell.'
   NEXT="claude plugin marketplace list"
 else
-  fail "Failed to register marketplace '$MARKETPLACE_REPO'"
+  fail "Failed to register marketplace '$MARKETPLACE_NAME' from '$MARKETPLACE_GIT'"
 fi
 
 # --- Done ---
