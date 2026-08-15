@@ -54,7 +54,12 @@ npx markdownlint-cli2 "**/*.md" "#node_modules"
 - install.sh must be POSIX sh (`#!/bin/sh`)
 - curl URLs in README must use commit SHAs, not branch names
 - Bump catalog version when updating plugin entries
-- Plugin source URLs point to GitHub repos (cloned by Claude Code on install)
+- Plugin sources use the `url` form with an explicit
+  `https://github.com/punt-labs/<repo>.git` URL — **not** the `github`/`repo`
+  form. Claude Code clones a `github`-source plugin over SSH (`git@github.com:`),
+  which fails for any user without a GitHub SSH key; the `url`/HTTPS form clones
+  a public repo anonymously. Adding an entry with `"source": "github"`
+  reintroduces the SSH requirement for every consumer.
 
 ## Documentation Discipline
 
