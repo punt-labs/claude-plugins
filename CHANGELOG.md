@@ -10,6 +10,15 @@ that affect how the marketplace itself installs or behaves.
 
 ### Fixed
 
+**`dungeon` could not be installed without a GitHub SSH key.** Its entry used
+`"source": "github"`, which Claude Code clones over SSH (`git@github.com:…`),
+so a keyless user's install failed at the parent clone. Switched to
+`"source": "url"` with an explicit `https://github.com/punt-labs/dungeon.git`
+URL, cloning a public repo anonymously, and re-pinned to `v0.1.6` — the release
+that also removed `dungeon`'s own SSH `ethos` submodule (which otherwise aborts
+the `--recurse-submodules` clone even over HTTPS). This is the pilot for
+converting the remaining entries to the `url` form.
+
 **The advertised installer was two commits behind the one in the repo.** The
 README pinned `2a7e501`, which predates the installer rewrite below. Both URLs
 now pin the commit that carries it, and `pin-guard` reports it next time.
