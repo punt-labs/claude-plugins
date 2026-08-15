@@ -32,12 +32,12 @@
     {
       "name": "dungeon",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/dungeon",
-        "ref": "v0.1.5"
+        "source": "url",
+        "url": "https://github.com/punt-labs/dungeon.git",
+        "ref": "v0.1.6"
       },
       "description": "A text adventure game engine for Claude Code \u2014 play scripted dungeon crawls powered by Claude as game master",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
