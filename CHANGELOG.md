@@ -10,6 +10,15 @@ that affect how the marketplace itself installs or behaves.
 
 ### Fixed
 
+**`install.sh` now registers the marketplace over an explicit HTTPS URL.**
+The script passed the `owner/repo` shorthand to
+`claude plugin marketplace add`, whose clone transport is resolved by the CLI
+and has varied by version. It now passes
+`https://github.com/punt-labs/claude-plugins.git`, pinning the clone to HTTPS
+so a public-repo install needs no SSH key and no GitHub authentication,
+independent of CLI version. The registered marketplace name is unchanged (it
+comes from `marketplace.json`), so no other behavior shifts.
+
 **Marketplace install failed for users without a GitHub SSH key.**
 `claude plugin marketplace add punt-labs/claude-plugins` clones this repo
 **with submodules**. The `.punt-labs/ethos` submodule pointed at

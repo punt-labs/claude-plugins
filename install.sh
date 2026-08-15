@@ -47,7 +47,14 @@ listed() {
   awk -v name="$1" '{ sub(/^[^[:alnum:]]+/, "") } $1 == name { found = 1 } END { exit !found }'
 }
 
+# Register by explicit HTTPS URL, not the "owner/repo" shorthand. The shorthand's
+# clone transport is resolved by the CLI and has varied by version; an https://
+# URL pins it to HTTPS, which clones a public repo with no SSH key and no GitHub
+# authentication. MARKETPLACE_REPO stays for human-readable messages; the
+# marketplace's registered name still comes from marketplace.json, so the
+# name-matching in listed() is unaffected by which form we add.
 MARKETPLACE_REPO="punt-labs/claude-plugins"
+MARKETPLACE_GIT="https://github.com/punt-labs/claude-plugins.git"
 MARKETPLACE_NAME="punt-labs"
 
 # --- Step 1: Prerequisites ---
@@ -116,7 +123,7 @@ if [ -n "$REGISTERED" ]; then
     why "$UPDATE_OUT"
     warn "retry with: claude plugin marketplace update $MARKETPLACE_NAME"
   fi
-elif claude plugin marketplace add "$MARKETPLACE_REPO" < /dev/null; then
+elif claude plugin marketplace add "$MARKETPLACE_GIT" < /dev/null; then
   # `add` exiting 0 is a claim, not proof. Confirm the name is in the listing.
   VERIFY=$(claude plugin marketplace list < /dev/null 2>&1) && VERIFY_RC=0 || VERIFY_RC=$?
   if [ "$VERIFY_RC" -ne 0 ]; then
