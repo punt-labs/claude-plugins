@@ -11,8 +11,8 @@
     {
       "name": "punt",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/punt-kit",
+        "source": "url",
+        "url": "https://github.com/punt-labs/punt-kit.git",
         "ref": "v0.11.2"
       },
       "description": "Punt Labs standards enforcement \u2014 init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
@@ -32,8 +32,8 @@
     {
       "name": "dungeon",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/dungeon",
+        "source": "url",
+        "url": "https://github.com/punt-labs/dungeon.git",
         "ref": "v0.1.5"
       },
       "description": "A text adventure game engine for Claude Code \u2014 play scripted dungeon crawls powered by Claude as game master",
@@ -51,8 +51,8 @@
     {
       "name": "beadle",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/beadle",
+        "source": "url",
+        "url": "https://github.com/punt-labs/beadle.git",
         "ref": "v0.16.1"
       },
       "description": "Autonomous agent daemon with email communication via Proton Bridge and PGP trust model",
@@ -72,8 +72,8 @@
     {
       "name": "biff",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/biff",
+        "source": "url",
+        "url": "https://github.com/punt-labs/biff.git",
         "ref": "v1.12.2"
       },
       "description": "UNIX-style team communication for Claude Code: /who, /finger, /plan, /write, /read, /mesg, /tty, /last, /wall, /talk",
@@ -92,8 +92,8 @@
     {
       "name": "prfaq",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/prfaq",
+        "source": "url",
+        "url": "https://github.com/punt-labs/prfaq.git",
         "ref": "v1.6.1"
       },
       "description": "Amazon Working Backwards PR/FAQ process \u2014 generate professional LaTeX documents for product discovery and decision-making",
@@ -112,8 +112,8 @@
     {
       "name": "vox",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/vox",
+        "source": "url",
+        "url": "https://github.com/punt-labs/vox.git",
         "ref": "v4.17.0"
       },
       "description": "Voice for your AI coding assistant: /unmute, /mute, /vibe, /recap \u2014 hear when tasks finish or need input",
@@ -133,8 +133,8 @@
     {
       "name": "quarry",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/quarry",
+        "source": "url",
+        "url": "https://github.com/punt-labs/quarry.git",
         "ref": "v3.0.0"
       },
       "description": "Local semantic search with automagic knowledge capture: /find, /ingest, /explain, /source, /quarry",
@@ -154,8 +154,8 @@
     {
       "name": "lux",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/lux",
+        "source": "url",
+        "url": "https://github.com/punt-labs/lux.git",
         "ref": "v0.23.1"
       },
       "description": "Visual output surface for Claude Code \u2014 display tables, charts, dashboards, and interactive elements in a native window",
@@ -176,8 +176,8 @@
     {
       "name": "z-spec",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/z-spec",
+        "source": "url",
+        "url": "https://github.com/punt-labs/z-spec.git",
         "ref": "v0.18.0"
       },
       "description": "Formal Z specifications for stateful systems \u2014 generate, type-check, animate, and derive test cases with fuzz and ProB",
@@ -198,8 +198,8 @@
     {
       "name": "ethos",
       "source": {
-        "source": "github",
-        "repo": "punt-labs/ethos",
+        "source": "url",
+        "url": "https://github.com/punt-labs/ethos.git",
         "ref": "v4.13.0"
       },
       "description": "Identity binding for humans and AI agents \u2014 voice, email, GitHub, writing style, personality, skills",

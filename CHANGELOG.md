@@ -10,6 +10,16 @@ that affect how the marketplace itself installs or behaves.
 
 ### Fixed
 
+**Plugin installs required a GitHub SSH key.** Every catalog entry used
+`"source": "github"` with a `"repo"` field, and Claude Code clones a
+`github`-source plugin over SSH (`git@github.com:…`) — verified from the
+`origin` remotes of the installed plugin clones, all of which were SSH even
+though the marketplace repo itself clones over HTTPS. A user without an SSH key
+could register the marketplace but not install any plugin. All ten entries now
+use `"source": "url"` with an explicit `https://github.com/punt-labs/<repo>.git`
+URL, which clones a public repo with no SSH key and no GitHub authentication.
+`ref` pins are unchanged.
+
 **`install.sh` now registers the marketplace over an explicit HTTPS URL.**
 The script passed the `owner/repo` shorthand to
 `claude plugin marketplace add`, whose clone transport is resolved by the CLI
