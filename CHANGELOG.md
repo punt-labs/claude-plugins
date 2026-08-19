@@ -10,6 +10,15 @@ that affect how the marketplace itself installs or behaves.
 
 ### Fixed
 
+**All plugins now install without a GitHub SSH key.** The remaining nine
+entries (punt, beadle, biff, prfaq, vox, quarry, lux, z-spec, ethos) used
+`"source": "github"`, which Claude Code clones over SSH (`git@github.com:…`),
+so a keyless user's install failed at the parent clone even after each plugin
+repo dropped its `ethos` submodule. Switched every entry to `"source": "url"`
+with an explicit `https://github.com/punt-labs/<repo>.git` URL, cloning public
+repos anonymously over HTTPS. Refs are unchanged (the submodule-free releases
+they already point at). Completes the conversion begun with `dungeon`.
+
 **`dungeon` could not be installed without a GitHub SSH key.** Its entry used
 `"source": "github"`, which Claude Code clones over SSH (`git@github.com:…`),
 so a keyless user's install failed at the parent clone. Switched to
