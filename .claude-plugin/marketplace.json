@@ -53,10 +53,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/beadle",
-        "ref": "v0.16.2"
+        "ref": "v0.16.3"
       },
       "description": "Autonomous agent daemon with email communication via Proton Bridge and PGP trust model",
-      "version": "0.16.2",
+      "version": "0.16.3",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
@@ -74,10 +74,10 @@
       "source": {
         "source": "github",
         "repo": "punt-labs/biff",
-        "ref": "v1.12.2"
+        "ref": "v1.12.3"
       },
       "description": "UNIX-style team communication for Claude Code: /who, /finger, /plan, /write, /read, /mesg, /tty, /last, /wall, /talk",
-      "version": "1.12.2",
+      "version": "1.12.3",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
