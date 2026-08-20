@@ -178,10 +178,10 @@
       "source": {
         "source": "url",
         "url": "https://github.com/punt-labs/z-spec.git",
-        "ref": "v0.18.1"
+        "ref": "v0.18.2"
       },
       "description": "Formal Z specifications for stateful systems \u2014 generate, type-check, animate, and derive test cases with fuzz and ProB",
-      "version": "0.18.1",
+      "version": "0.18.2",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
