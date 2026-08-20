@@ -8,6 +8,19 @@ that affect how the marketplace itself installs or behaves.
 
 ## [Unreleased]
 
+### Changed
+
+**Installs now fetch only the `plugin/` subtree, not the whole repo.** Switched
+eight entries (punt, dungeon, beadle, prfaq, vox, lux, z-spec, ethos) from
+`"source": "url"` (a full-repo HTTPS clone) to `"source": "git-subdir"` with
+`"path": "plugin"`, pinned at each plugin's newly-restructured release tag
+(punt v0.15.0, dungeon v0.1.7, beadle v0.16.4, prfaq v1.7.3, vox v5.0.0,
+lux v0.26.0, z-spec v0.18.2, ethos v4.14.0). Claude Code uses a blobless,
+cone-mode sparse checkout, so a keyless install materializes only the plugin
+surface (verified: a `--filter=blob:none` clone + `sparse-checkout set --cone
+plugin` fetches `plugin/` and no `src/`). biff and quarry follow once their
+gated PyPI publishes land.
+
 ### Fixed
 
 **All plugins now install without a GitHub SSH key.** The remaining nine
