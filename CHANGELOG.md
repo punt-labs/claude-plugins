@@ -10,16 +10,17 @@ that affect how the marketplace itself installs or behaves.
 
 ### Changed
 
-**Installs now fetch only the `plugin/` subtree, not the whole repo.** Switched
-eight entries (punt, dungeon, beadle, prfaq, vox, lux, z-spec, ethos) from
-`"source": "url"` (a full-repo HTTPS clone) to `"source": "git-subdir"` with
-`"path": "plugin"`, pinned at each plugin's newly-restructured release tag
-(punt v0.15.0, dungeon v0.1.7, beadle v0.16.4, prfaq v1.7.3, vox v5.0.0,
-lux v0.26.0, z-spec v0.18.2, ethos v4.14.0). Claude Code uses a blobless,
-cone-mode sparse checkout, so a keyless install materializes only the plugin
-surface (verified: a `--filter=blob:none` clone + `sparse-checkout set --cone
-plugin` fetches `plugin/` and no `src/`). biff and quarry follow once their
-gated PyPI publishes land.
+**Installs now fetch only the `plugin/` subtree, not the whole repo.**
+Superseding the `"source": "url"` conversion below (which still cloned the
+entire repo over HTTPS), eight entries (punt, dungeon, beadle, prfaq, vox, lux,
+z-spec, ethos) move to `"source": "git-subdir"` with `"path": "plugin"`, pinned
+at each plugin's newly-restructured release tag (punt v0.15.0, dungeon v0.1.7,
+beadle v0.16.4, prfaq v1.7.3, vox v5.0.0, lux v0.26.0, z-spec v0.18.2, ethos
+v4.14.0). Claude Code uses a blobless, cone-mode sparse checkout, so a keyless
+install materializes only the plugin surface (verified: a `--filter=blob:none`
+clone plus a cone-mode `sparse-checkout` of `plugin` fetches `plugin/` and no
+`src/`). biff and quarry remain on `"source": "url"` for now and follow once
+their gated PyPI publishes land.
 
 ### Fixed
 
