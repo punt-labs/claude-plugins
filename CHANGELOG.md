@@ -19,8 +19,8 @@ beadle v0.16.4, prfaq v1.7.3, vox v5.0.0, lux v0.26.0, z-spec v0.18.2, ethos
 v4.14.0). Claude Code uses a blobless, cone-mode sparse checkout, so a keyless
 install materializes only the plugin surface (verified: a `--filter=blob:none`
 clone plus a cone-mode `sparse-checkout` of `plugin` fetches `plugin/` and no
-`src/`). biff and quarry remain on `"source": "url"` for now and follow once
-their gated PyPI publishes land.
+`src/`). biff (v1.13.0) and quarry (v3.0.2) complete the set once their gated
+PyPI publishes landed — **all ten marketplace entries now use `git-subdir`**.
 
 ### Fixed
 
