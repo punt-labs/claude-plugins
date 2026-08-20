@@ -11,12 +11,13 @@
     {
       "name": "punt",
       "source": {
-        "source": "url",
+        "source": "git-subdir",
         "url": "https://github.com/punt-labs/punt-kit.git",
-        "ref": "v0.14.3"
+        "path": "plugin",
+        "ref": "v0.15.0"
       },
-      "description": "Punt Labs standards enforcement \u2014 init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
-      "version": "0.14.3",
+      "description": "Punt Labs standards enforcement — init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
+      "version": "0.15.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
@@ -32,12 +33,13 @@
     {
       "name": "dungeon",
       "source": {
-        "source": "url",
+        "source": "git-subdir",
         "url": "https://github.com/punt-labs/dungeon.git",
-        "ref": "v0.1.6"
+        "path": "plugin",
+        "ref": "v0.1.7"
       },
-      "description": "A text adventure game engine for Claude Code \u2014 play scripted dungeon crawls powered by Claude as game master",
-      "version": "0.1.6",
+      "description": "A text adventure game engine for Claude Code — play scripted dungeon crawls powered by Claude as game master",
+      "version": "0.1.7",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
@@ -51,8 +53,9 @@
     {
       "name": "beadle",
       "source": {
-        "source": "url",
+        "source": "git-subdir",
         "url": "https://github.com/punt-labs/beadle.git",
+        "path": "plugin",
         "ref": "v0.16.4"
       },
       "description": "Autonomous agent daemon with email communication via Proton Bridge and PGP trust model",
@@ -92,12 +95,13 @@
     {
       "name": "prfaq",
       "source": {
-        "source": "url",
+        "source": "git-subdir",
         "url": "https://github.com/punt-labs/prfaq.git",
-        "ref": "v1.7.2"
+        "path": "plugin",
+        "ref": "v1.7.3"
       },
-      "description": "Amazon Working Backwards PR/FAQ process \u2014 generate professional LaTeX documents for product discovery and decision-making",
-      "version": "1.7.2",
+      "description": "Amazon Working Backwards PR/FAQ process — generate professional LaTeX documents for product discovery and decision-making",
+      "version": "1.7.3",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
@@ -112,11 +116,12 @@
     {
       "name": "vox",
       "source": {
-        "source": "url",
+        "source": "git-subdir",
         "url": "https://github.com/punt-labs/vox.git",
+        "path": "plugin",
         "ref": "v5.0.0"
       },
-      "description": "Voice for your AI coding assistant: /unmute, /mute, /vibe, /recap \u2014 hear when tasks finish or need input",
+      "description": "Voice for your AI coding assistant: /unmute, /mute, /vibe, /recap — hear when tasks finish or need input",
       "version": "5.0.0",
       "author": {
         "name": "Punt Labs",
@@ -154,11 +159,12 @@
     {
       "name": "lux",
       "source": {
-        "source": "url",
+        "source": "git-subdir",
         "url": "https://github.com/punt-labs/lux.git",
+        "path": "plugin",
         "ref": "v0.26.0"
       },
-      "description": "Visual output surface for Claude Code \u2014 display tables, charts, dashboards, and interactive elements in a native window",
+      "description": "Visual output surface for Claude Code — display tables, charts, dashboards, and interactive elements in a native window",
       "version": "0.26.0",
       "author": {
         "name": "Punt Labs",
@@ -176,11 +182,12 @@
     {
       "name": "z-spec",
       "source": {
-        "source": "url",
+        "source": "git-subdir",
         "url": "https://github.com/punt-labs/z-spec.git",
+        "path": "plugin",
         "ref": "v0.18.2"
       },
-      "description": "Formal Z specifications for stateful systems \u2014 generate, type-check, animate, and derive test cases with fuzz and ProB",
+      "description": "Formal Z specifications for stateful systems — generate, type-check, animate, and derive test cases with fuzz and ProB",
       "version": "0.18.2",
       "author": {
         "name": "Punt Labs",
@@ -198,11 +205,12 @@
     {
       "name": "ethos",
       "source": {
-        "source": "url",
+        "source": "git-subdir",
         "url": "https://github.com/punt-labs/ethos.git",
+        "path": "plugin",
         "ref": "v4.14.0"
       },
-      "description": "Identity binding for humans and AI agents \u2014 voice, email, GitHub, writing style, personality, skills",
+      "description": "Identity binding for humans and AI agents — voice, email, GitHub, writing style, personality, skills",
       "version": "4.14.0",
       "author": {
         "name": "Punt Labs",
