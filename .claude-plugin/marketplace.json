@@ -140,10 +140,10 @@
       "source": {
         "source": "url",
         "url": "https://github.com/punt-labs/quarry.git",
-        "ref": "v3.0.1"
+        "ref": "v3.0.2"
       },
       "description": "Local semantic search with automagic knowledge capture: /find, /ingest, /explain, /source, /quarry",
-      "version": "3.0.1",
+      "version": "3.0.2",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
