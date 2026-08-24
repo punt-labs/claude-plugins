@@ -120,10 +120,10 @@
         "source": "git-subdir",
         "url": "https://github.com/punt-labs/vox.git",
         "path": "plugin",
-        "ref": "v5.0.0"
+        "ref": "v5.0.1"
       },
       "description": "Voice for your AI coding assistant: /unmute, /mute, /vibe, /recap \u2014 hear when tasks finish or need input",
-      "version": "5.0.0",
+      "version": "5.0.1",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
