@@ -56,10 +56,10 @@
         "source": "git-subdir",
         "url": "https://github.com/punt-labs/beadle.git",
         "path": "plugin",
-        "ref": "v0.16.4"
+        "ref": "v0.16.5"
       },
       "description": "Autonomous agent daemon with email communication via Proton Bridge and PGP trust model",
-      "version": "0.16.4",
+      "version": "0.16.5",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
