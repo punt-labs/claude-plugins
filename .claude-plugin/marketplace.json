@@ -14,10 +14,10 @@
         "source": "git-subdir",
         "url": "https://github.com/punt-labs/punt-kit.git",
         "path": "plugin",
-        "ref": "v0.15.0"
+        "ref": "v0.16.0"
       },
       "description": "Punt Labs standards enforcement \u2014 init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
-      "version": "0.15.0",
+      "version": "0.16.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
