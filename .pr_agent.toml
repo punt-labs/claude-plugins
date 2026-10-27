@@ -14,7 +14,7 @@ Targets: macOS and Linux with a POSIX sh. Nothing else.
 Report every finding in this one pass; do not hold findings back for a later pass.
 Flag only defects reachable by a real caller of the changed code: logic errors, security, API contract breaks, catalog entries that break a consumer's install, wrong version or commit pins.
 Do not flag hypothetical environments (exotic env vars such as CDPATH or GIT_TRACE, control bytes in paths, tests run as root).
-Do not flag what CI enforces: markdownlint, the leak guard (no submodules, no tracked plugin state), the README installer pin check.
+Do not flag what CI enforces: markdownlint, the leak guard (no submodules, no tracked plugin state). The README installer pin check is not a required check, so do flag a README that points at an outdated installer.
 Do not flag lines the PR did not change.
 Never suggest adding git submodules or tracked per-repo plugin state, and never suggest replacing a commit-SHA pin with a branch name.
 """
