@@ -1,0 +1,34 @@
+# Qodo v2 review config (punt-kit pr_agent.toml template). One review on open, no per-push re-review, only High findings inline.
+[github_app]
+ignore_bot_pr = true
+pr_commands = ["/agentic_describe", "/agentic_review"]
+handle_push_trigger = false
+
+[review_agent]
+enable_incremental_review = true
+# comments_routing below is authoritative; the threshold restates it (High only inline).
+inline_comments_severity_threshold = 3
+issues_user_guidelines = """
+claude-plugins is the Punt Labs Claude Code plugin marketplace catalog: a JSON catalog (.claude-plugin/marketplace.json), a POSIX sh installer (install.sh), and Markdown docs. It is cloned onto every consumer's machine.
+Targets: macOS and Linux with a POSIX sh. Nothing else.
+Report every finding in this one pass; do not hold findings back for a later pass.
+Flag only defects reachable by a real caller of the changed code: logic errors, security, API contract breaks, catalog entries that break a consumer's install, wrong version or commit pins.
+Do not flag hypothetical environments (exotic env vars such as CDPATH or GIT_TRACE, control bytes in paths, tests run as root).
+Do not flag what CI enforces: markdownlint, the leak guard (no submodules, no tracked plugin state), the README installer pin check.
+Do not flag lines the PR did not change.
+Never suggest adding git submodules or tracked per-repo plugin state, and never suggest replacing a commit-SHA pin with a branch name.
+"""
+compliance_user_guidelines = """
+Apply code rules only: correctness, typing, error handling, security, and the coding standards for the changed files.
+Do not grade PR titles, PR descriptions, commit messages, or CHANGELOG wording.
+Do not grade agent process rules from CLAUDE.md, AGENTS.md, or WORKFLOW.md (missions, beads, review cycles, delegation).
+"""
+smart_router_extra_instructions = """
+High risk: .claude-plugin/marketplace.json (every plugin entry, version and source ref a consumer installs), install.sh, and .github/workflows/.
+Low risk: docs-only diffs (*.md).
+"""
+
+[review_agent.comments_routing]
+action_required = "both"
+remediation_recommended = "summary"
+informational = "drop"
