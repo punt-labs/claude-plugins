@@ -32,12 +32,14 @@ jobs:
         with:
           globs: "**/*.md"
 
-  # Enforces "Why This Repo Is Different" (CLAUDE.md). `claude plugin
+  # Enforces that the tracked file set is safe to publish. `claude plugin
   # marketplace add punt-labs/claude-plugins` clones this repo onto every
   # user's machine, with submodules, so the tracked file set IS the published
-  # artifact. Until now that rule existed only as prose; PR #286 had to remove
-  # a submodule and four plugin-state paths after they shipped. Runs on every
-  # push and PR, ~10s, no network beyond the checkout.
+  # artifact: no submodules (they break the install), and nothing tracked that
+  # .gitignore excludes (plugin-generated state leaks internal rosters and
+  # relay URLs). PR #286 had to remove a submodule and four plugin-state paths
+  # after they shipped. Runs on every push and PR, ~10s, no network beyond the
+  # checkout.
   #
   # This job is intended to be a REQUIRED status check: every failure it
   # reports is fixable inside the PR that causes it — untrack the file, restore
@@ -178,6 +180,7 @@ jobs:
             '.biff'                                 # .biff
             '.beads/config.yaml'                    # .beads/
             '.claude/agents/adb.md'                 # .claude/agents/
+            'CLAUDE.md'                             # CLAUDE.md
             '.claude/settings.json'                 # .claude/settings.json
             '.github/workflows/biff-notify.yml'     # .github/workflows/biff-notify.yml
             'imgui.ini'                             # imgui.ini
@@ -234,28 +237,12 @@ jobs:
             fi
           fi
 
-          # There is deliberately no check on @-import lines in CLAUDE.md, and
-          # this note exists so the next agent does not build one again. Four
-          # attempts were made and each fixed its predecessor's defect while
-          # adding a new one: a literal '^@\.punt-labs' caught one spelling of
-          # seven; widening to line-leading tokens still missed the documented
-          # inline form; scanning every token then failed the build on
-          # `@.punt-labs/<tool>/CLAUDE.md` in this repo's own docs; adding
-          # fence and code-span exclusions to fix that reintroduced a vacuous
-          # pass, because an unclosed ```text fence swallows every line after
-          # it and markdownlint has no unbalanced-fence rule to catch the
-          # input. Correctly classifying an import means implementing
-          # CommonMark in awk.
-          #
-          # The stakes did not justify it. A dangling import that ships means a
-          # consumer's CLAUDE.md names a path they do not have, and Claude Code
-          # ignores it — cosmetic. A missed submodule breaks their install and a
-          # missed tracked-and-ignored file leaks the team roster, which is what
-          # (a) and (b) prevent in four lines and one git pipeline. Enablement's
-          # state files are still caught by (b); only the import line is
-          # unguarded. If you are tempted to add this check back, the cost to
-          # beat is a build that fails on a correct line, which is what teaches
-          # people to delete checks.
+          # CLAUDE.md itself is ignored (see .gitignore), so there is no tracked
+          # agent guide to inspect for @-import lines. A `<tool> enable` run in
+          # this checkout may still write a CLAUDE.md at the repo root, but
+          # because the file is ignored, check (b) above catches it the moment it
+          # is tracked, and its canary catches a deleted ignore rule. The import
+          # content never ships, so there is nothing further to validate here.
 
           if [ "$fail" -ne 0 ]; then
             echo
@@ -264,9 +251,8 @@ jobs:
             echo "~/.claude/plugins/marketplaces/punt-labs/, submodules and all."
             echo "The tracked file set IS the published artifact. Fix the files"
             echo "listed above — do not delete this check to get green, it is the"
-            echo "only mechanical enforcement of CLAUDE.md's \"Why This Repo Is"
-            echo "Different\". Note this job does not inspect @-import lines in"
-            echo "CLAUDE.md; keeping those correct is still a human review step."
+            echo "only mechanical guard against tracking a submodule or local"
+            echo "tooling state that ships to every consumer."
             echo "The installer URL pinned in README.md is checked separately, by"
             echo "the pin-guard job; nothing here says anything about it."
             exit 1
@@ -313,8 +299,8 @@ jobs:
   # Scope decision, recorded so it is not re-litigated: the pattern matches a
   # fully-formed raw.githubusercontent.com .../install.sh URL ANYWHERE in
   # README.md — prose and fenced blocks alike. A bare SHA in a sentence ("the
-  # fix landed in 2a7e501", as the CHANGELOG writes them) does NOT match and
-  # cannot trip this; only a complete, copy-and-runnable URL does, and a reader
+  # fix landed in 2a7e501") does NOT match and cannot trip this; only a
+  # complete, copy-and-runnable URL does, and a reader
   # can copy one of those wherever it sits. Strict on purpose. To reference a
   # historical installer in prose, link the blob view instead —
   # github.com/punt-labs/claude-plugins/blob/<sha>/install.sh — which is not

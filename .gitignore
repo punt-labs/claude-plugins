@@ -1,21 +1,32 @@
 *.local
 *.local.*
 
-# Scratch directory (TMPDIR set via .envrc)
+# Scratch directory
 .tmp/*
 !.tmp/.gitkeep
 
 # Plugin-generated per-repo state. Claude Code clones this repo onto every
 # user's machine when they run `claude plugin marketplace add`, so anything
 # tracked here ships to all consumers. A submodule tracked here is worse than
-# leakage — it breaks the install outright (see CLAUDE.md, "Why This Repo Is
-# Different"). Keep these on disk for local tooling; never commit them.
+# leakage — it breaks the install outright: the clone recurses, and an SSH
+# submodule URL fails auth before repo visibility is consulted, aborting the
+# whole marketplace add for any user without a GitHub SSH key. Keep these on
+# disk for local tooling; never commit them.
 .punt-labs/
 .vox/
 .lux/
 .biff
 .beads/
 .claude/agents/
+
+# CLAUDE.md is not tracked here. This is a distribution catalog with no
+# contributors to onboard, so there is no repo-local agent guide to ship — and
+# shipping one would land internal instructions in every consumer's clone. The
+# file is ignored rather than merely deleted because a `<tool> enable` run in
+# this checkout (vox, biff, quarry, lux, ethos, beadle) writes or appends to a
+# CLAUDE.md at the repo root; ignoring it stops that output from being tracked
+# and re-shipped. The leak-guard canary for this rule is in docs.yml.
+CLAUDE.md
 
 # Same leak, narrower paths — these sit beside files the repo legitimately
 # tracks, so they are named individually. Ignoring all of `.claude/` or all of
