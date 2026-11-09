@@ -31,26 +31,6 @@
       ]
     },
     {
-      "name": "dungeon",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/punt-labs/dungeon.git",
-        "path": "plugin",
-        "ref": "v0.1.7"
-      },
-      "description": "A text adventure game engine for Claude Code — play scripted dungeon crawls powered by Claude as game master",
-      "version": "0.1.7",
-      "author": {
-        "name": "Punt Labs",
-        "email": "hello@punt-labs.com"
-      },
-      "keywords": [
-        "game",
-        "adventure",
-        "dungeon"
-      ]
-    },
-    {
       "name": "beadle",
       "source": {
         "source": "git-subdir",
