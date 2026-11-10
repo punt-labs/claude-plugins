@@ -132,14 +132,13 @@ jobs:
           # switched off from outside itself.
           #
           # One canary per rule, because a canary only ever pins its own rule.
-          # An earlier version pinned four, all taken from .gitignore's
-          # "narrower paths" block, and left the main block above it unpinned.
+          # An earlier version pinned only some rules and left others unpinned.
           # Deleting the single `.punt-labs/` line was then enough to track
           # .punt-labs/ethos/identities/claude.yaml — a plain `git add`, no -f
           # needed — and this job reported OK at rc=0. That is the team
-          # registry vendored as ordinary files: the leak the footer names as
-          # the reason the job exists. Check (a) does not cover it, because
-          # de-submoduled files are not a submodule.
+          # registry vendored as ordinary files: the leak this job exists to
+          # catch. Check (a) does not cover it, because de-submoduled files are
+          # not a submodule.
           #
           # The list below is therefore derived from .gitignore line by line,
           # and each path is chosen to match exactly ONE rule so a deleted rule
@@ -153,9 +152,8 @@ jobs:
           #   2. It detects coverage NARROWING, never WIDENING. Replacing
           #      `.claude/settings.json` with `.claude/` leaves every canary
           #      green while the next `git add -A` silently stops tracking
-          #      .claude/hooks/check-branch.sh — the exact failure .gitignore
-          #      argues against in prose where it declines to ignore that
-          #      directory. Nothing here detects that; review does.
+          #      .claude/hooks/check-branch.sh — a real hook this repo should
+          #      track. Nothing here detects that; review does.
           if [ ! -f .gitignore ]; then
             echo "FAIL: .gitignore is missing. Every rule the leak check applies"
             echo "    lives there, so without it the check passes vacuously."

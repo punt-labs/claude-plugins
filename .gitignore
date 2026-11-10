@@ -1,4 +1,4 @@
-# Editor/OS and local overrides
+# Local overrides
 *.local
 *.local.*
 
