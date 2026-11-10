@@ -16,7 +16,7 @@
         "path": "plugin",
         "ref": "v0.18.0"
       },
-      "description": "Punt Labs standards enforcement — init, audit, and LLM-powered reconciliation of workflows, configs, and project structure",
+      "description": "Punt Labs standards enforcement — LLM-powered reconciliation of workflows, configs, and project structure",
       "version": "0.18.0",
       "author": {
         "name": "Punt Labs",
@@ -38,7 +38,7 @@
         "path": "plugin",
         "ref": "v0.17.0"
       },
-      "description": "Autonomous agent daemon with email communication via Proton Bridge and PGP trust model",
+      "description": "Autonomous agent daemon with cryptographic owner control. Email communication via IMAP/SMTP with PGP trust model.",
       "version": "0.17.0",
       "author": {
         "name": "Punt Labs",
@@ -102,7 +102,7 @@
         "path": "plugin",
         "ref": "v5.0.7"
       },
-      "description": "Voice for your AI coding assistant: /unmute, /mute, /vibe, /recap — hear when tasks finish or need input",
+      "description": "Text-to-speech for Claude Code: /unmute, /mute, /vibe, /vox:recap",
       "version": "5.0.7",
       "author": {
         "name": "Punt Labs",
@@ -124,7 +124,7 @@
         "path": "plugin",
         "ref": "v3.6.0"
       },
-      "description": "Local semantic search with automagic knowledge capture: /find, /ingest, /explain, /source, /quarry",
+      "description": "Local semantic search for Claude Code: /find, /ingest, /remember, /explain, /source, /quarry",
       "version": "3.6.0",
       "author": {
         "name": "Punt Labs",
@@ -146,7 +146,7 @@
         "path": "plugin",
         "ref": "v0.33.1"
       },
-      "description": "Visual output surface for Claude Code — display tables, charts, dashboards, and interactive elements in a native window",
+      "description": "Visual output surface for Claude Code: display text, images, tables, plots, and interactive elements",
       "version": "0.33.1",
       "author": {
         "name": "Punt Labs",
@@ -169,7 +169,7 @@
         "path": "plugin",
         "ref": "v0.20.5"
       },
-      "description": "Formal Z specifications for stateful systems — generate, type-check, animate, and derive test cases with fuzz and ProB",
+      "description": "Create, validate, and test formal Z specifications for stateful systems using fuzz and probcli",
       "version": "0.20.5",
       "author": {
         "name": "Punt Labs",
@@ -192,7 +192,7 @@
         "path": "plugin",
         "ref": "v4.22.1"
       },
-      "description": "Identity binding for humans and AI agents — voice, email, GitHub, writing style, personality, skills",
+      "description": "Identity binding for humans and AI agents — voice, email, GitHub, writing style, personality.",
       "version": "4.22.1",
       "author": {
         "name": "Punt Labs",

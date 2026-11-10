@@ -146,10 +146,6 @@ jobs:
           # produces a named failure instead of a silent narrowing. --no-index
           # means none of these need to exist on disk.
           #
-          # Every rule in .gitignore is pinned except `!.tmp/.gitkeep`, which
-          # needs no canary: it is a negation, and deleting it makes a TRACKED
-          # file ignored, which check (b) reports directly.
-          #
           # Two limits this list does NOT close, named so nobody assumes they
           # are covered:
           #   1. It cannot know about a rule added to .gitignore after it was
@@ -173,7 +169,7 @@ jobs:
           canaries=(
             'notes.local'                           # *.local
             'settings.local.json'                   # *.local.*
-            '.tmp/scratch'                          # .tmp/*
+            '.tmp/scratch'                          # .tmp/
             '.punt-labs/ethos/identities/x.yaml'    # .punt-labs/
             '.vox/vox.md'                           # .vox/
             '.lux/lux.md'                           # .lux/
