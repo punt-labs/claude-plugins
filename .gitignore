@@ -1,83 +1,27 @@
+# Local overrides
 *.local
 *.local.*
 
-# Scratch directory
-.tmp/*
-!.tmp/.gitkeep
+# Scratch
+.tmp/
 
-# Plugin-generated per-repo state. Claude Code clones this repo onto every
-# user's machine when they run `claude plugin marketplace add`, so anything
-# tracked here ships to all consumers. A submodule tracked here is worse than
-# leakage — it breaks the install outright: the clone recurses, and an SSH
-# submodule URL fails auth before repo visibility is consulted, aborting the
-# whole marketplace add for any user without a GitHub SSH key. Keep these on
-# disk for local tooling; never commit them.
+# Plugin-generated per-repo state
 .punt-labs/
 .vox/
 .lux/
 .biff
 .beads/
 .claude/agents/
-
-# CLAUDE.md is not tracked here. This is a distribution catalog with no
-# contributors to onboard, so there is no repo-local agent guide to ship — and
-# shipping one would land internal instructions in every consumer's clone. The
-# file is ignored rather than merely deleted because a `<tool> enable` run in
-# this checkout (vox, biff, quarry, lux, ethos, beadle) writes or appends to a
-# CLAUDE.md at the repo root; ignoring it stops that output from being tracked
-# and re-shipped. The leak-guard canary for this rule is in docs.yml.
 CLAUDE.md
 
-# Same leak, narrower paths — these sit beside files the repo legitimately
-# tracks, so they are named individually. Ignoring all of `.claude/` or all of
-# `.github/workflows/` would mask real content: `.github/workflows/docs.yml`
-# is this repo's only CI.
-#   settings.json  — written by `vox enable` and punt-kit init; registers hooks
-#                    by absolute path to one machine's plugin install, so it is
-#                    inert-to-broken on anyone else's disk.
-#   biff-notify.yml — written by `biff enable`; posts session events to the
-#                    team's NATS relay, and would run in every consumer's fork
-#                    against credentials they do not have.
-#
-# `.claude/hooks/` is deliberately NOT ignored. Every occupant observed across
-# the org — check-branch.sh, no-push-to-main.sh, make-check-gate.sh — is
-# portable governance shell, and koch-trainer-swift tracks its copies on
-# purpose. Ignoring the directory would silently block this repo from
-# committing a repo-authored validation hook, and silently is the operative
-# word: `git add` skips an ignored path without a word, so the author gets no
-# signal at all. The machine-specific occupant is settings.json, and that is
-# what is named.
+# Machine-specific tool output
 .claude/settings.json
 .github/workflows/biff-notify.yml
 
-# A submodule here does not leak data, it breaks the install: Claude Code
-# clones this repo with submodules, so an SSH submodule URL aborts the clone
-# for every user without a GitHub SSH key.
-#
-# `.gitmodules` is deliberately NOT ignored, and this comment exists so nobody
-# re-adds it. Ignoring it hid the file twice over: `git status` went quiet
-# locally, and CI could not see it either, because a checkout materialises only
-# tracked files. It also bought nothing — `git submodule add` stages
-# .gitmodules with --force regardless of any ignore rule (verified). Leaving it
-# visible restores the local signal at no cost, because the leak-guard job in
-# .github/workflows/docs.yml fails the build on both the file and the gitlink
-# (mode 160000).
-
-# The lux display process writes ImGui window geometry into its working
-# directory on exit. Per-machine screen state (pane sizes, docking layout) that
-# would follow a consumer's window manager around. Named exactly rather than
-# `*.ini`: an unanchored `*.ini` matches at any depth and would silently
-# swallow a future tox.ini, pytest.ini, or mypy.ini, and `git add` skips an
-# ignored path without a word. Every .ini observed across the org's repos is
-# one of these three shapes.
+# lux window geometry
 imgui.ini
 Lux.ini
 Lux_*.ini
 
-# The mandated sibling lock every punt CLI takes before mutating a shared
-# host file (tool-enable-disable.md 2.4). Per-machine runtime state, and it
-# persists by design — unlinking a lock file races the next writer. The
-# pattern is broad because the lock's name is the host file's, and tools
-# differ on the suffix — .CLAUDE.md.lock and .CLAUDE.md.punt-import.lock
-# both appear.
+# punt CLI sibling locks
 .*.lock
