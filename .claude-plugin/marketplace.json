@@ -190,10 +190,10 @@
         "source": "git-subdir",
         "url": "https://github.com/punt-labs/ethos.git",
         "path": "plugin",
-        "ref": "v5.0.0"
+        "ref": "v5.0.1"
       },
       "description": "Identity binding for humans and AI agents — voice, email, GitHub, writing style, personality.",
-      "version": "5.0.0",
+      "version": "5.0.1",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
