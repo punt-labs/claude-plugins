@@ -58,10 +58,10 @@
         "source": "git-subdir",
         "url": "https://github.com/punt-labs/biff.git",
         "path": "plugin",
-        "ref": "v1.21.1"
+        "ref": "v1.22.0"
       },
       "description": "UNIX-style team communication for Claude Code: /who, /finger, /plan, /write, /read, /mesg, /tty, /last, /wall, /talk",
-      "version": "1.21.1",
+      "version": "1.22.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
