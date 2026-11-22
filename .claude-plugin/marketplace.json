@@ -167,10 +167,10 @@
         "source": "git-subdir",
         "url": "https://github.com/punt-labs/z-spec.git",
         "path": "plugin",
-        "ref": "v0.20.5"
+        "ref": "v0.21.0"
       },
       "description": "Create, validate, and test formal Z specifications for stateful systems using fuzz and probcli",
-      "version": "0.20.5",
+      "version": "0.21.0",
       "author": {
         "name": "Punt Labs",
         "email": "hello@punt-labs.com"
